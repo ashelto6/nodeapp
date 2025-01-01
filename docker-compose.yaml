@@ -20,3 +20,6 @@ services:
         env_file: .env
         ports:
             - ${NGINX_PORT}:${NGINX_PORT}
+        volumes:
+            - ../server/src:/usr/share/nginx/html
+        
