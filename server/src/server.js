@@ -1,5 +1,4 @@
-import express from "express";
-const app = express();
+const app = require('express')
 const path = require('path');
 
 
