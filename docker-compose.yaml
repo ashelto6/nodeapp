@@ -10,7 +10,7 @@ services:
         ports:
             - ${SERVER_PORT}:${SERVER_PORT}
         volumes:
-            - ./server/src:./server/src
+            - ./server/src:/root/websvr/nodeapp/server/src
 
     nginx:
         image: nginximg
