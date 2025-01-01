@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 const app = express();
-const path = path();
+const vpath = path();
 
 
 app.use('/images', express.static(path.join(__dirname, '../images')));
