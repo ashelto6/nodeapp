@@ -4,7 +4,7 @@
   "description": "A Node.js application serving a static HTML file, used for load balancing with NGINX.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node ./src/server.js"
   },
   "author": "Your Name",
   "license": "MIT",
