@@ -1,8 +1,9 @@
-const app = require('express')
+const express = require('express')
 const path = require('path');
+const app = express();
 
 
-app.use('/images', app.static(path.join(__dirname, '../images')));
+app.use('/images', express.static(path.join(__dirname, '../images')));
 
 
 app.use('/', (req, res) => {
