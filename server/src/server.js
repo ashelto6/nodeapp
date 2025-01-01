@@ -1,12 +1,16 @@
 import express from "express";
 const app = express();
 
-app.get('/', (req, res) => {
-    const headers = req.headers;
-    res.status(200).send(headers);
-    console.log("LAST TRY!");
-})
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+
+app.use('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+    console.log(`Request served by ${process.env.SERVER_HOST}`);
+});
+
 
 app.listen(process.env.SERVER_PORT, () => {
-    console.log(`Express listening on port ${process.env.SERVER_PORT}`);
+    console.log(`${process.env.SERVER_HOST} is listening on port ${process.env.SERVER_PORT}`);
 });

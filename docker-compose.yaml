@@ -9,8 +9,6 @@ services:
         env_file: .env
         ports:
             - ${SERVER_PORT}:${SERVER_PORT}
-        volumes:
-            - ./server/src:/root/websvr/nodeapp/server/src
 
     nginx:
         image: nginximg
@@ -22,5 +20,7 @@ services:
         env_file: .env
         ports:
             - ${NGINX_PORT}:${NGINX_PORT}
+        volumes:
+            - ./server/:/usr/share/nginx/html
         
         
