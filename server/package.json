@@ -1,33 +1,16 @@
 {
-  "name": "",
+  "name": "nginx-crash-course",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
-  "license": "AGPL-version-3.0",
-  "private": false,
-  "engines": {
-    "node": ">= 14.0.0",
-    "npm": ">= 6.0.0"
-  },
-  "homepage": "",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "bugs": "",
-  "keywords": [],
-  "author": {
-    "name": "",
-    "email": "",
-    "url": ""
-  },
-  "contributors": [],
+  "description": "A Node.js application serving a static HTML file, used for load balancing with NGINX.",
+  "main": "server.js",
   "scripts": {
-    "start": "node ./src/server.js"
+    "start": "node server.js"
   },
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
-    "express": "^4.21.2",
+    "express": "^4.17.1",
     "path": "^0.12.7"
   }
 }
+
