@@ -4,6 +4,7 @@ const app = express();
 app.get('/', (req, res) => {
     const headers = req.headers;
     res.status(200).send(headers);
+    console.log(headers);
 })
 
 app.listen(process.env.SERVER_PORT, () => {
