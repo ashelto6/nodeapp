@@ -21,6 +21,6 @@ services:
         ports:
             - ${NGINX_PORT}:${NGINX_PORT}
         volumes:
-            - ./server/:/usr/share/nginx/html
+            - ./server/src:/usr/share/nginx/html
         
         
