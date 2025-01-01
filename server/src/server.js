@@ -4,7 +4,7 @@ const app = express();
 app.get('/', (req, res) => {
     const headers = req.headers;
     res.status(200).send(headers);
-    console.log("HEY WRONG PLACE DUMMY!");
+    console.log("LAST TRY!");
 })
 
 app.listen(process.env.SERVER_PORT, () => {
