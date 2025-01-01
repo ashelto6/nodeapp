@@ -2,7 +2,7 @@ const app = require('express')
 const path = require('path');
 
 
-app.use('/images', express.static(path.join(__dirname, '../images')));
+app.use('/images', app.static(path.join(__dirname, '../images')));
 
 
 app.use('/', (req, res) => {
