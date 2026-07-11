@@ -46,6 +46,16 @@ sudo usermod -aG docker deploy
 # log out and back in for the group change to apply
 ```
 
+Confirm you have the Compose **v2** plugin, not just the legacy `docker-compose`
+v1 binary — the deploy workflow runs `docker compose ...` (with a space):
+
+```bash
+docker compose version
+```
+
+If that fails, `get.docker.com` should already have installed it as part of
+`docker-ce-cli`; if not, install `docker-compose-plugin` for your distro.
+
 ## 3. Clone the app and configure it
 
 ```bash

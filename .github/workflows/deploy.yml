@@ -19,8 +19,12 @@ jobs:
         include:
           - name: server
             context: ./server
+            dockerfile: server/Dockerfile
+            target: ""
           - name: nginx
-            context: ./nginx
+            context: .
+            dockerfile: nginx/Dockerfile
+            target: prod
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,6 +43,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/nodeapp-${{ matrix.name }}:latest

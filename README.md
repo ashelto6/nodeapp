@@ -1,1 +1,73 @@
 # nodeapp
+
+A MERN (MongoDB, Express, React, Node) app behind nginx, deployed to Linode
+via GitHub Actions.
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) — MERN restructure plan and reasoning
+- [CONTRIBUTING.md](CONTRIBUTING.md) — issue/branch/PR workflow
+- [DEPLOY.md](DEPLOY.md) — one-time Linode server setup and deploy pipeline
+
+## Local development
+
+Requires Docker and Docker Compose.
+
+1. Copy the example env file and adjust values if needed:
+   ```bash
+   cp .env.example .env
+   ```
+2. Start the full stack in dev mode (hot-reload client + server, nginx
+   proxying to the Vite dev server):
+   ```bash
+   docker compose up
+   ```
+   `docker-compose.override.yml` is picked up automatically alongside
+   `docker-compose.yaml` whenever you run `docker compose` with no `-f`
+   flags — no extra flags needed for the dev shape.
+3. Open `http://localhost:<NGINX_PORT>` (default `9999`) in a browser.
+   This loads the React client, which calls `/api/health` (proxied
+   through nginx to Express, which reports MongoDB connection status) —
+   you should see the API status and Mongo connection state rendered on
+   the page. In dev mode you can also hit the Vite dev server directly
+   at `http://localhost:<CLIENT_PORT>` (default `5173`), bypassing nginx.
+4. Edits to files under `client/` or `server/` hot-reload automatically
+   (Vite HMR for the client, `nodemon` for the server).
+
+### Testing the production shape locally
+
+The dev override adds hot-reload and a `client` dev-server container that
+don't exist in production — nginx instead serves a static React build
+baked into its own image. To build/run that shape locally instead:
+
+```bash
+docker compose -f docker-compose.yaml up --build
+```
+
+Passing `-f` explicitly disables Compose's automatic pickup of
+`docker-compose.override.yml`.
+
+### Useful commands
+
+| Command | What it does |
+|---|---|
+| `docker compose up` | Start everything in dev mode (override auto-applied) |
+| `docker compose build` | Build all images (dev shape, since override auto-applies) |
+| `docker compose down` | Stop and remove containers |
+| `docker compose logs -f <service>` | Tail a specific service's logs (`server`, `nginx`, `client`, `mongo`) |
+
+**Shutting down properly**: run `docker compose down` when you're done,
+not just `Ctrl+C` on a foreground `docker compose up`. `Ctrl+C` only
+*stops* the containers — it doesn't remove them, so they keep holding
+their container names and cause a "name already in use" conflict the
+next time you run `up`. `down` stops *and* removes them cleanly. It does
+not delete your Mongo data (the named volume persists on purpose); use
+`docker compose down -v` only if you deliberately want to wipe the
+database too.
+
+### Services
+
+| Service | Container name (env var) | Port (env var) |
+|---|---|---|
+| nginx (entrypoint) | `NGINX_HOST` | `NGINX_PORT` |
+| server (Express API) | `SERVER_HOST` | `SERVER_PORT` |
+| client (Vite dev server, dev only) | `CLIENT_HOST` | `CLIENT_PORT` |
+| mongo | `MONGO_HOST` | `MONGO_PORT` |
