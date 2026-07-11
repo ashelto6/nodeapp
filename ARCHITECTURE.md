@@ -88,3 +88,25 @@ for the actual commands.
 
 Add `MONGO_HOST`, `MONGO_PORT`, `MONGO_DB` (or a single `MONGO_URI`),
 `CLIENT_HOST`, `CLIENT_PORT` to `.env.example`.
+
+## Known gaps, deliberately deferred
+
+Things that are genuine gaps but don't have a concrete next action yet —
+listed here (rather than as issues) so the reasoning isn't lost, with the
+condition that would turn each into real work.
+
+- **Single point of failure.** One Linode box runs nginx, Express, and
+  Mongo together, each as a single instance — no redundancy or load
+  balancing. This isn't one fix but a staged evolution: #7 (Atlas) and #6
+  (CDN) already peel Mongo and static assets off the box respectively.
+  What's left after those — redundant app-server instances behind a load
+  balancer — has no trigger yet besides observed resource pressure (via
+  #11's monitoring) or downtime actually costing something (real users,
+  an SLA). Not worth planning further until one of those is true.
+- **No staging environment.** A real staging environment roughly doubles
+  the infrastructure (another server, another Mongo instance, its own
+  deploy pipeline), which isn't justified at zero-traffic solo-dev scale.
+  Trigger: real users who'd be affected by a bad deploy, or deploys
+  becoming risky enough (schema migrations, breaking API changes) that
+  local prod-shape testing (see [README.md](README.md#testing-the-production-shape-locally))
+  stops being sufficient confidence.
