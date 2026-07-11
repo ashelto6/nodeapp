@@ -1,10 +1,10 @@
 {
-  "name": "nginx-crash-course",
+  "name": "webapp",
   "version": "1.0.0",
-  "description": "A Node.js application serving a static HTML file, used for load balancing with NGINX.",
+  "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node ./src/server.js"
+    "start": "node ./src/js/server.js"
   },
   "author": "Your Name",
   "license": "MIT",
