@@ -1,5 +1,6 @@
 services:
     server:
+        image: ghcr.io/ashelto6/nodeapp-server:dev
         build:
             target: dev
         volumes:
@@ -7,6 +8,7 @@ services:
             - /server/node_modules
 
     nginx:
+        image: ghcr.io/ashelto6/nodeapp-nginx:dev
         build:
             target: dev
 
