@@ -1,0 +1,102 @@
+# Deploying to Linode
+
+This is a one-time setup you run yourself on the Linode server (over SSH). Once
+it's done, every push to `main` auto-builds and redeploys via
+`.github/workflows/deploy.yml` — no manual steps after that.
+
+## 1. Harden the server
+
+SSH in as root the first time, then:
+
+```bash
+# Create a non-root user with sudo access
+adduser deploy
+usermod -aG sudo deploy
+
+# Copy your SSH public key to the new user so key-based login works
+rsync --archive --chown=deploy:deploy ~/.ssh /home/deploy
+
+# From here on, log in as `deploy`, not root
+```
+
+As `deploy` (with sudo), lock down SSH and add a firewall:
+
+```bash
+sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+sudo systemctl restart ssh
+
+sudo apt update && sudo apt install -y ufw fail2ban unattended-upgrades
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw --force enable
+sudo systemctl enable --now fail2ban
+```
+
+This gives you: no root login, no password login (key-only), a firewall that
+only allows SSH/HTTP/HTTPS, brute-force protection, and automatic security
+patches.
+
+## 2. Install Docker
+
+```bash
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker deploy
+# log out and back in for the group change to apply
+```
+
+## 3. Clone the app and configure it
+
+```bash
+git clone https://github.com/ashelto6/nodeapp.git
+cd nodeapp
+cp .env.example .env
+# edit .env if you want different ports/hostnames than the defaults
+```
+
+`.env` is gitignored — it stays local to the server and is never pushed to
+GitHub.
+
+## 4. Allow the server to pull images from GHCR
+
+If the GHCR packages are public (Package settings on GitHub → make public),
+no auth is needed and you can skip this. Otherwise, create a GitHub Personal
+Access Token with `read:packages` scope and log in once on the server:
+
+```bash
+echo <your-PAT> | docker login ghcr.io -u ashelto6 --password-stdin
+```
+
+## 5. First manual deploy (sanity check)
+
+```bash
+docker compose pull
+docker compose up -d
+docker compose ps
+```
+
+Visit `http://<linode-ip>:<NGINX_PORT>` to confirm it's serving.
+
+## 6. Wire up GitHub Actions
+
+In the GitHub repo: **Settings → Secrets and variables → Actions**, add:
+
+| Secret            | Value                                              |
+|--------------------|-----------------------------------------------------|
+| `LINODE_HOST`      | server IP or hostname                              |
+| `LINODE_USER`      | `deploy`                                           |
+| `LINODE_SSH_KEY`   | private key matching a public key in `deploy`'s `~/.ssh/authorized_keys` |
+| `LINODE_APP_DIR`   | absolute path, e.g. `/home/deploy/nodeapp`         |
+
+Push to `main` (or merge a PR into it) and the workflow will build, push to
+GHCR, and redeploy automatically.
+
+## Not covered yet
+
+- **TLS/HTTPS** — skipped for now since there's no domain pointed at this
+  server. Once you have one, point an A record at the Linode IP and we can
+  add a certbot companion to the nginx service for Let's Encrypt certs.
+- **Zero-downtime deploys** — `docker compose up -d` briefly interrupts
+  service on each deploy (a few seconds). Fine for now; revisit with a
+  proper rolling/blue-green setup later if uptime during deploys matters.
