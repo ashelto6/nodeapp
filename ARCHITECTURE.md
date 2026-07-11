@@ -40,7 +40,9 @@ nginx serves the built React files for `/`, and forwards anything under
 
 This also avoids CORS entirely (client and API appear same-origin from
 the browser's point of view), and means the static tier can later move to
-a CDN without touching Express at all.
+a CDN without touching Express at all. That migration is tracked as
+future work in #6, once there's a real domain and actual scale to
+justify it.
 
 ### 2. How do you develop the React app day-to-day?
 
@@ -63,18 +65,24 @@ enabled.
 Options were self-hosting Mongo in a container, or a managed cloud
 version (MongoDB Atlas) where backups/scaling are handled externally.
 Self-hosting is simplest and free, good enough for learning and early
-development. Migrating to Atlas is deferred to a future issue once there
-is real data worth protecting with proper backups.
+development. Migrating to Atlas is deferred to #7, once there is real
+data worth protecting with proper backups.
 
-## Open implementation detail
+## How the nginx dev/prod split was resolved
 
-nginx's routing needs to differ between dev and prod: in dev, `/` should
-proxy to the `client` dev-server container (no build exists yet); in
-prod, `/` is served as static files baked into the nginx image and there
-is no `client` container at runtime. Likely needs a
-`docker-compose.override.yml` (dev-only, auto-merged) plus either two
-nginx config templates or an env-var-driven proxy target — to be worked
-out during implementation.
+`nginx/Dockerfile` is a multi-stage build with a `prod` stage (builds the
+React client and copies its `dist/` into the nginx image, serving it as
+static files) and a `dev` stage (skips the client build entirely). Two
+separate config templates — `default.conf.prod.template` and
+`default.conf.dev.template` — are copied in depending on which stage
+builds; only the dev template proxies `/` to the `client` dev-server
+container, with the `Upgrade`/`Connection` headers Vite's HMR needs.
+
+`docker-compose.yaml` builds the `prod` target by default.
+`docker-compose.override.yml` (auto-merged by Compose whenever you run
+`docker compose` with no `-f` flags) switches nginx's `target` to `dev`
+and adds the `client` service. See [README.md](README.md#local-development)
+for the actual commands.
 
 ## New/changed env vars
 

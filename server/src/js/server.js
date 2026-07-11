@@ -1,17 +1,17 @@
-const express = require('express')
-const path = require('path');
+const express = require('express');
+const mongoose = require('mongoose');
+const { connectDB } = require('./db');
+
 const app = express();
 
-app.use('/images', express.static(path.join(__dirname, '../../images')));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'html', 'index.html'));
-    console.log(`Request served by ${process.env.SERVER_HOST}`);
+app.get('/api/health', (req, res) => {
+    const mongoState = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    res.json({ status: 'ok', mongo: mongoState });
 });
 
-app.get('/script.js', (req, res) => {
-    res.sendFile(path.join(__dirname, 'script.js'));
-});
+connectDB()
+    .then(() => console.log('Connected to MongoDB'))
+    .catch((err) => console.error('MongoDB connection error:', err));
 
 app.listen(process.env.SERVER_PORT, () => {
     console.log(`${process.env.SERVER_HOST} is listening on port ${process.env.SERVER_PORT}`);

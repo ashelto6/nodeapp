@@ -5,6 +5,7 @@ services:
         build:
             context: ./server
             dockerfile: Dockerfile
+            target: prod
         container_name: ${SERVER_HOST}
         restart: unless-stopped
         env_file: .env
@@ -14,10 +15,24 @@ services:
     nginx:
         image: ghcr.io/ashelto6/nodeapp-nginx:latest
         build:
-            context: ./nginx
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: nginx/Dockerfile
+            target: prod
         container_name: ${NGINX_HOST}
         restart: unless-stopped
         env_file: .env
         ports:
             - ${NGINX_PORT}:${NGINX_PORT}
+        depends_on:
+            - server
+
+    mongo:
+        image: mongo:7
+        container_name: ${MONGO_HOST}
+        restart: unless-stopped
+        env_file: .env
+        volumes:
+            - mongo-data:/data/db
+
+volumes:
+    mongo-data:

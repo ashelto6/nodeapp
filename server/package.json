@@ -4,13 +4,17 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node ./src/js/server.js"
+    "start": "node ./src/js/server.js",
+    "dev": "nodemon ./src/js/server.js"
   },
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
-    "path": "^0.12.7"
+    "mongoose": "^8.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
   }
 }
 

@@ -14,5 +14,8 @@ jobs:
       - name: Build server image
         run: docker build -t nodeapp-server:ci ./server
 
+      - name: Build client image
+        run: docker build -t nodeapp-client:ci --target build ./client
+
       - name: Build nginx image
-        run: docker build -t nodeapp-nginx:ci ./nginx
+        run: docker build -t nodeapp-nginx:ci -f nginx/Dockerfile --target prod .

@@ -1,0 +1,24 @@
+services:
+    server:
+        build:
+            target: dev
+        volumes:
+            - ./server:/server
+            - /server/node_modules
+
+    nginx:
+        build:
+            target: dev
+
+    client:
+        build:
+            context: ./client
+            dockerfile: Dockerfile
+            target: dev
+        container_name: ${CLIENT_HOST}
+        env_file: .env
+        ports:
+            - ${CLIENT_PORT}:${CLIENT_PORT}
+        volumes:
+            - ./client:/client
+            - /client/node_modules
