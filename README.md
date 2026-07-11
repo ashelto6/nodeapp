@@ -54,6 +54,15 @@ Passing `-f` explicitly disables Compose's automatic pickup of
 | `docker compose down` | Stop and remove containers |
 | `docker compose logs -f <service>` | Tail a specific service's logs (`server`, `nginx`, `client`, `mongo`) |
 
+**Shutting down properly**: run `docker compose down` when you're done,
+not just `Ctrl+C` on a foreground `docker compose up`. `Ctrl+C` only
+*stops* the containers — it doesn't remove them, so they keep holding
+their container names and cause a "name already in use" conflict the
+next time you run `up`. `down` stops *and* removes them cleanly. It does
+not delete your Mongo data (the named volume persists on purpose); use
+`docker compose down -v` only if you deliberately want to wipe the
+database too.
+
 ### Services
 
 | Service | Container name (env var) | Port (env var) |
