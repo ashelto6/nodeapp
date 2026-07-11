@@ -1,24 +1,23 @@
 version: "3.8"
 services:
     server:
-        image: nodeimg
+        image: ghcr.io/ashelto6/nodeapp-server:latest
         build:
             context: ./server
             dockerfile: Dockerfile
         container_name: ${SERVER_HOST}
+        restart: unless-stopped
         env_file: .env
         ports:
             - ${SERVER_PORT}:${SERVER_PORT}
 
     nginx:
-        image: nginximg
-        restart: always
+        image: ghcr.io/ashelto6/nodeapp-nginx:latest
         build:
             context: ./nginx
             dockerfile: Dockerfile
         container_name: ${NGINX_HOST}
+        restart: unless-stopped
         env_file: .env
         ports:
             - ${NGINX_PORT}:${NGINX_PORT}
-        
-        
