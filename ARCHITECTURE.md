@@ -100,7 +100,17 @@ server/src/
   routes/          # thin URL→controller maps, one router per feature (*.routes.js)
   controllers/     # request-handling logic, one per feature (*.controller.js)
   models/          # Mongoose schemas, one per collection (added as features need them)
+  middleware/      # cross-cutting request/response handling (error handling, etc.)
+  utils/           # small shared helpers (HttpError, asyncHandler)
 ```
+
+Error handling is centralized (issue #39): unmatched routes get a JSON
+404, and all thrown errors land in one error middleware mounted after
+the routes. Controllers signal intentional failures by throwing
+`HttpError(status, message)`; anything else returns a generic 500
+without leaking internals. Async controllers must be wrapped in
+`asyncHandler(...)` in their route file — Express 4 does not route
+rejected promises to error middleware on its own.
 
 The rule that keeps this from rotting: **routes contain no logic,
 controllers contain no route definitions, and server.js never gains
