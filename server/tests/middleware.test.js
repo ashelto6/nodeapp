@@ -1,0 +1,108 @@
+import { describe, it, expect, vi } from 'vitest';
+import express from 'express';
+import request from 'supertest';
+import { z } from 'zod';
+import { errorHandler, notFoundHandler } from '../src/middleware/error.middleware';
+import { validate } from '../src/middleware/validate.middleware';
+import { HttpError } from '../src/utils/http-error';
+import { asyncHandler } from '../src/utils/async-handler';
+
+// Builds a minimal app around one route so each middleware can be
+// exercised through real requests, independent of the app's real routes.
+function appWith(route) {
+    const app = express();
+    app.use(express.json());
+    route(app);
+    app.use(notFoundHandler);
+    app.use(errorHandler);
+    return app;
+}
+
+describe('errorHandler', () => {
+    it('exposes status and message for intentional HttpErrors', async () => {
+        const app = appWith((a) =>
+            a.get('/boom', () => {
+                throw new HttpError(418, 'intentional teapot');
+            })
+        );
+
+        const res = await request(app).get('/boom');
+
+        expect(res.status).toBe(418);
+        expect(res.body).toEqual({ error: 'intentional teapot' });
+    });
+
+    it('returns a sanitized 500 for unexpected errors without leaking details', async () => {
+        // Silence the intentional console.error this path produces.
+        const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const app = appWith((a) =>
+            a.get('/boom', () => {
+                throw new Error('secret internal details');
+            })
+        );
+
+        const res = await request(app).get('/boom');
+
+        expect(res.status).toBe(500);
+        expect(res.body).toEqual({ error: 'Internal server error' });
+        expect(JSON.stringify(res.body)).not.toContain('secret');
+        expect(errSpy).toHaveBeenCalled(); // still logged server-side
+        errSpy.mockRestore();
+    });
+});
+
+describe('asyncHandler', () => {
+    it('routes async rejections to the error middleware', async () => {
+        const app = appWith((a) =>
+            a.get(
+                '/async-boom',
+                asyncHandler(async () => {
+                    throw new HttpError(404, 'async not found');
+                })
+            )
+        );
+
+        const res = await request(app).get('/async-boom');
+
+        expect(res.status).toBe(404);
+        expect(res.body).toEqual({ error: 'async not found' });
+    });
+});
+
+describe('validate', () => {
+    const bodySchema = z.object({
+        username: z.string().min(3),
+        age: z.coerce.number().int().positive().optional(),
+    });
+    const echoApp = () =>
+        appWith((a) =>
+            a.post('/echo', validate({ body: bodySchema }), (req, res) => {
+                res.json({ received: req.body });
+            })
+        );
+
+    it('passes clean input through parsed: coerces types and strips unknown fields', async () => {
+        const res = await request(echoApp())
+            .post('/echo')
+            .send({ username: 'tony', age: '30', smuggled: 'field' });
+
+        expect(res.status).toBe(200);
+        expect(res.body.received).toEqual({ username: 'tony', age: 30 });
+    });
+
+    it('rejects invalid input with a 400 naming the field', async () => {
+        const res = await request(echoApp()).post('/echo').send({ username: 'ab' });
+
+        expect(res.status).toBe(400);
+        expect(res.body.error).toContain('body.username');
+    });
+
+    it('rejects NoSQL-injection-shaped payloads', async () => {
+        const res = await request(echoApp())
+            .post('/echo')
+            .send({ username: { $gt: '' } });
+
+        expect(res.status).toBe(400);
+        expect(res.body.error).toContain('body.username');
+    });
+});

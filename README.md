@@ -45,6 +45,22 @@ docker compose -f docker-compose.yaml up --build
 Passing `-f` explicitly disables Compose's automatic pickup of
 `docker-compose.override.yml`.
 
+### Running tests
+
+Both `server/` and `client/` have Vitest suites, run the same way in
+each directory (locally with Node 20, or via the same container image
+the Docker builds use):
+
+```bash
+cd server && npm test
+cd client && npm test
+# or without local Node:
+docker run --rm -v "$(pwd)/server:/server" -w /server node:20-alpine npm test
+```
+
+CI runs both suites on every pull request (the `test` check), and both
+`test` and `build` must pass before a PR can merge.
+
 ### Useful commands
 
 | Command | What it does |
