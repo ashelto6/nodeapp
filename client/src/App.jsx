@@ -1,22 +1,9 @@
-import { useEffect, useState } from 'react';
+import HomePage from './pages/HomePage';
 
+// App is the composition root. When a second page arrives, React Router
+// mounts here (<Routes> mapping paths to pages/) — see ARCHITECTURE.md.
 function App() {
-  const [health, setHealth] = useState(null);
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((res) => res.json())
-      .then(setHealth)
-      .catch(() => setHealth({ status: 'error', mongo: 'unknown' }));
-  }, []);
-
-  return (
-    <div>
-      <h1>webapp</h1>
-      <p>API status: {health ? health.status : 'loading...'}</p>
-      <p>Mongo: {health ? health.mongo : 'loading...'}</p>
-    </div>
-  );
+  return <HomePage />;
 }
 
 export default App;
