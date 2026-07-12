@@ -3,6 +3,12 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  // Vitest configuration (vitest reads vite.config.js natively).
+  // jsdom simulates a browser DOM so components can render in tests.
+  test: {
+    environment: 'jsdom',
+    setupFiles: './tests/setup.js',
+  },
   server: {
     host: true,
     port: Number(process.env.CLIENT_PORT) || 5173,
