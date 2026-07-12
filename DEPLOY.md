@@ -109,10 +109,15 @@ echo <your-PAT> | docker login ghcr.io -u ashelto6 --password-stdin
 ## 5. First manual deploy (sanity check)
 
 ```bash
-docker compose pull
-docker compose up -d
-docker compose ps
+docker compose -f docker-compose.yaml pull
+docker compose -f docker-compose.yaml up -d
+docker compose -f docker-compose.yaml ps
 ```
+
+`-f docker-compose.yaml` is required here, not optional — without it,
+Compose auto-applies `docker-compose.override.yml` (present in the
+cloned repo too) and tries to pull `:dev`-tagged images that were never
+pushed to GHCR, since only `:latest`/`:<sha>` get published.
 
 Visit `http://<linode-ip>:<NGINX_PORT>` to confirm it's serving.
 
