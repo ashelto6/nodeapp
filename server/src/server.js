@@ -1,6 +1,7 @@
 const express = require('express');
 const { connectDB } = require('./db');
 const healthRoutes = require('./routes/health.routes');
+const { notFoundHandler, errorHandler } = require('./middleware/error.middleware');
 
 const app = express();
 
@@ -10,6 +11,11 @@ app.use(express.json());
 // Mount each feature's router under its /api path. New features add a
 // router in src/routes and mount it here — server.js stays bootstrap-only.
 app.use('/api/health', healthRoutes);
+
+// Error handling must be mounted after all routes: unmatched requests
+// fall through to the JSON 404, and thrown errors land in errorHandler.
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Connect to MongoDB in the background. The server still starts if Mongo
 // is unavailable; /api/health reports the connection state either way.
