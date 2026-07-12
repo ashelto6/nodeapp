@@ -20,7 +20,7 @@ jobs:
           - name: server
             context: ./server
             dockerfile: server/Dockerfile
-            target: ""
+            target: prod
           - name: nginx
             context: .
             dockerfile: nginx/Dockerfile

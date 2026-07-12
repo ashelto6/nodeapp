@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build server image
-        run: docker build -t nodeapp-server:ci ./server
+        run: docker build -t nodeapp-server:ci --target prod ./server
 
       - name: Build client image
         run: docker build -t nodeapp-client:ci --target build ./client
