@@ -1,5 +1,5 @@
-const { createApp } = require('./app');
-const { connectDB } = require('./db');
+import { createApp } from './app.js';
+import { connectDB } from './db.js';
 
 // Runtime entry point: side effects live here (DB connection, listening),
 // keeping app.js pure and importable by tests.

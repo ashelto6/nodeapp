@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 function connectDB() {
     const { MONGO_HOST, MONGO_PORT, MONGO_DB, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD } = process.env;
@@ -6,4 +6,4 @@ function connectDB() {
     return mongoose.connect(uri);
 }
 
-module.exports = { connectDB };
+export { connectDB };

@@ -1,6 +1,6 @@
-const express = require('express');
-const healthRoutes = require('./routes/health.routes');
-const { notFoundHandler, errorHandler } = require('./middleware/error.middleware');
+import express from 'express';
+import healthRoutes from './routes/health.routes.js';
+import { notFoundHandler, errorHandler } from './middleware/error.middleware.js';
 
 // Builds and returns the configured Express app WITHOUT starting it or
 // touching the database. server.js uses this for the real process;
@@ -23,4 +23,4 @@ function createApp() {
     return app;
 }
 
-module.exports = { createApp };
+export { createApp };
