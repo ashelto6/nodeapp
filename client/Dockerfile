@@ -2,8 +2,8 @@ FROM node:20-alpine AS base
 
 WORKDIR /client
 
-COPY package.json .
-RUN npm i
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY . .
 
