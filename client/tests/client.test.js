@@ -31,6 +31,19 @@ describe('request', () => {
     await expect(request('/api/thing')).rejects.toThrow('Invalid request: body.username');
   });
 
+  it('falls back to a status-based message when the error JSON has no error field', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: () => Promise.resolve({ unrelated: 'shape' }),
+      })
+    );
+
+    await expect(request('/api/thing')).rejects.toThrow('Request failed: 503');
+  });
+
   it('falls back to a status-based message when the error body is not JSON', async () => {
     vi.stubGlobal(
       'fetch',

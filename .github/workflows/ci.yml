@@ -16,17 +16,17 @@ jobs:
         with:
           node-version: 20
 
-      - name: Server tests
+      - name: Server tests (with coverage gate)
         working-directory: server
         run: |
           npm ci
-          npm test
+          npm run test:coverage
 
-      - name: Client tests
+      - name: Client tests (with coverage gate)
         working-directory: client
         run: |
           npm ci
-          npm test
+          npm run test:coverage
 
   build:
     runs-on: ubuntu-latest

@@ -61,6 +61,14 @@ docker run --rm -v "$(pwd)/server:/server" -w /server node:20-alpine npm test
 CI runs both suites on every pull request (the `test` check), and both
 `test` and `build` must pass before a PR can merge.
 
+CI runs the suites with a **coverage gate** (`npm run test:coverage`):
+thresholds live in `server/vitest.config.js` and `client/vite.config.js`,
+set just under measured coverage so CI fails on regression. When coverage
+grows, ratchet the thresholds up — never lower them to make a failing PR
+pass. Every `src/` file counts toward coverage (untested files can't hide
+by never being imported); the few deliberate exclusions are the
+side-effect-only entry points, each documented in the config.
+
 ### Useful commands
 
 | Command | What it does |
