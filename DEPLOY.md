@@ -38,6 +38,27 @@ This gives you: no root login, no password login (key-only), a firewall that
 only allows SSH/HTTP/HTTPS, brute-force protection, and automatic security
 patches.
 
+**Important caveat**: Docker inserts its own `iptables` rules directly for
+any port it publishes, in a way that bypasses `ufw` entirely — `ufw`'s
+rules above do **not** actually govern which Docker-published ports are
+reachable from the internet. The real enforcement for this app is the
+**Linode Cloud Firewall** (a separate, network-level firewall configured
+in the Linode dashboard, not on the server itself) — see step 1a below.
+Properly integrating `ufw` with Docker (e.g. via the `ufw-docker` project)
+is tracked as a follow-up, not yet done.
+
+## 1a. Configure the Linode Cloud Firewall
+
+In the Linode dashboard, under **Firewalls** (a separate section from the
+Linode itself):
+1. Create a firewall and attach it to this Linode.
+2. Add inbound rules: TCP 22 (SSH), TCP 80 (HTTP), TCP 443 (HTTPS), sources
+   set to all IPv4/IPv6. Save.
+3. Only after those rules are saved: set **Inbound Policy: Drop** and
+   **Outbound Policy: Accept**, then save again. (Setting Drop before the
+   rules exist will lock out SSH — Linode's Lish console, authenticated
+   with the root password, is the fallback if that happens.)
+
 ## 2. Install Docker
 
 ```bash
@@ -67,6 +88,13 @@ cp .env.example .env
 
 `.env` is gitignored — it stays local to the server and is never pushed to
 GitHub.
+
+**Set `NGINX_PORT=80` in production** rather than leaving the `.env.example`
+default of `9999` (that default is a local-dev convenience value only).
+Using the standard HTTP port means the site is reachable at the bare IP/
+domain with no port number needed, and matches the firewall rules below
+(only 22/80/443 are allowed in) without needing a one-off exception for a
+non-standard port.
 
 ## 4. Allow the server to pull images from GHCR
 
