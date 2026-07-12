@@ -121,6 +121,27 @@ fields stripped, declared coercions applied), so controllers only ever
 see clean data and never validate anything themselves. No route that
 accepts input should ship without a schema.
 
+## Client code structure (issue #38)
+
+```
+client/src/
+  main.jsx         # React bootstrap: mounts <App> into #root
+  App.jsx          # composition root; React Router mounts here when a 2nd page arrives
+  pages/           # one component per screen; pages own data-fetching and state
+  components/      # reusable presentational pieces; receive data via props, never fetch
+  api/             # the only place fetch() is called:
+                   #   client.js = generic request/error handling
+                   #   <feature>.api.js = feature-scoped functions pages import
+```
+
+The client-side rules mirroring the server's: **components never fetch
+(pages do, through `api/`), and `api/` modules contain no rendering.**
+Two upgrades are deliberately deferred with explicit triggers: React
+Router lands when the second page does, and a data-fetching library
+(e.g. TanStack Query) replaces the plain `api/` modules when real
+features need caching, mutations, or loading-state orchestration beyond
+what a `useEffect` reasonably handles.
+
 The rule that keeps this from rotting: **routes contain no logic,
 controllers contain no route definitions, and server.js never gains
 either** — a new feature means a new router file mounted in server.js,
