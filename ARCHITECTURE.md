@@ -112,6 +112,15 @@ without leaking internals. Async controllers must be wrapped in
 `asyncHandler(...)` in their route file — Express 4 does not route
 rejected promises to error middleware on its own.
 
+Input validation is declared per-route with Zod (issue #40): any route
+that accepts input attaches `validate({ body/params/query: schema })`
+from `middleware/validate.middleware.js` ahead of its controller.
+Failures become structured 400s through the error middleware; on
+success the request part is replaced with Zod's parsed output (unknown
+fields stripped, declared coercions applied), so controllers only ever
+see clean data and never validate anything themselves. No route that
+accepts input should ship without a schema.
+
 The rule that keeps this from rotting: **routes contain no logic,
 controllers contain no route definitions, and server.js never gains
 either** — a new feature means a new router file mounted in server.js,
