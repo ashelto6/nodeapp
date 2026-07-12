@@ -8,6 +8,27 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: './tests/setup.js',
+    coverage: {
+      // istanbul, matching the server (see issue #17 for why not v8).
+      provider: 'istanbul',
+      // Count every source file so untested files can't escape the
+      // accounting by never being imported in a test.
+      include: ['src/**'],
+      exclude: [
+        // React bootstrap: side effects only (mounts <App> into #root);
+        // exercised by the compose shapes, not unit tests.
+        'src/main.jsx',
+      ],
+      // Ratcheted gate (issue #17): thresholds sit just under measured
+      // coverage at the time of the last update. Raise as coverage
+      // grows -- never lower to make a failing PR pass.
+      thresholds: {
+        statements: 95,
+        branches: 85,
+        functions: 95,
+        lines: 95,
+      },
+    },
   },
   server: {
     host: true,
