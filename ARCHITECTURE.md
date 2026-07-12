@@ -89,6 +89,27 @@ for the actual commands.
 Add `MONGO_HOST`, `MONGO_PORT`, `MONGO_DB` (or a single `MONGO_URI`),
 `CLIENT_HOST`, `CLIENT_PORT` to `.env.example`.
 
+## Server code structure (issue #37)
+
+The Express server uses a standard layered layout under `server/src/`:
+
+```
+server/src/
+  server.js        # bootstrap only: create app, mount routers, connect DB, listen
+  db.js            # MongoDB connection setup (mongoose)
+  routes/          # thin URL→controller maps, one router per feature (*.routes.js)
+  controllers/     # request-handling logic, one per feature (*.controller.js)
+  models/          # Mongoose schemas, one per collection (added as features need them)
+```
+
+The rule that keeps this from rotting: **routes contain no logic,
+controllers contain no route definitions, and server.js never gains
+either** — a new feature means a new router file mounted in server.js,
+a new controller, and (usually) a model. If a controller starts
+accumulating non-HTTP business logic worth reusing or testing in
+isolation, that's the trigger to introduce a `services/` layer between
+controllers and models — deliberately not created up front.
+
 ## Known gaps, deliberately deferred
 
 Things that are genuine gaps but don't have a concrete next action yet —
