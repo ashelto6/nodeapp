@@ -65,6 +65,8 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.LINODE_APP_DIR }}
+            git fetch origin main
+            git reset --hard origin/main
             docker compose -f docker-compose.yaml pull
             docker compose -f docker-compose.yaml up -d --remove-orphans
             docker image prune -f
