@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import request from 'supertest';
 import mongoose from 'mongoose';
-import { createApp } from '../src/app';
+import { createApp } from '../src/app.js';
 
 // Integration tests: real HTTP requests through the full app pipeline
 // (routes -> middleware -> controllers -> error handling), in memory.

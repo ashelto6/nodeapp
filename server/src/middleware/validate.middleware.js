@@ -1,4 +1,4 @@
-const { HttpError } = require('../utils/http-error');
+import { HttpError } from '../utils/http-error.js';
 
 // Validation middleware factory. A route declares Zod schemas for the
 // request parts it accepts, and the controller only ever runs if they
@@ -29,4 +29,4 @@ function validate(schemas) {
     };
 }
 
-module.exports = { validate };
+export { validate };

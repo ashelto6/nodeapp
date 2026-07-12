@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { z } from 'zod';
-import { errorHandler, notFoundHandler } from '../src/middleware/error.middleware';
-import { validate } from '../src/middleware/validate.middleware';
-import { HttpError } from '../src/utils/http-error';
-import { asyncHandler } from '../src/utils/async-handler';
+import { errorHandler, notFoundHandler } from '../src/middleware/error.middleware.js';
+import { validate } from '../src/middleware/validate.middleware.js';
+import { HttpError } from '../src/utils/http-error.js';
+import { asyncHandler } from '../src/utils/async-handler.js';
 
 // Builds a minimal app around one route so each middleware can be
 // exercised through real requests, independent of the app's real routes.

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // Reports API liveness and the current MongoDB connection state.
 // mongoose.connection.readyState: 0 = disconnected, 1 = connected,
@@ -8,4 +8,4 @@ function getHealth(req, res) {
     res.json({ status: 'ok', mongo: mongoState });
 }
 
-module.exports = { getHealth };
+export { getHealth };
