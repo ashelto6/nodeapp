@@ -110,7 +110,10 @@ the routes. Controllers signal intentional failures by throwing
 `HttpError(status, message)`; anything else returns a generic 500
 without leaking internals. Async controllers must be wrapped in
 `asyncHandler(...)` in their route file — Express 4 does not route
-rejected promises to error middleware on its own.
+rejected promises to error middleware on its own. Unexpected errors
+(and only those — never intentional HttpErrors) are also captured to
+Sentry with request context (issue #35), active only when SENTRY_DSN
+is set (production).
 
 Input validation is declared per-route with Zod (issue #40): any route
 that accepts input attaches `validate({ body/params/query: schema })`

@@ -7,6 +7,14 @@ import { validate } from '../src/middleware/validate.middleware.js';
 import { HttpError } from '../src/utils/http-error.js';
 import { asyncHandler } from '../src/utils/async-handler.js';
 import { logger } from '../src/logger.js';
+import { Sentry } from '../src/sentry.js';
+
+// ESM namespace exports can't be spied on at runtime, so the sentry
+// wrapper module is mocked wholesale -- error.middleware receives this
+// object, and the tests assert against its mock function directly.
+vi.mock('../src/sentry.js', () => ({
+    Sentry: { captureException: vi.fn() },
+}));
 
 // Builds a minimal app around one route so each middleware can be
 // exercised through real requests, independent of the app's real routes.
@@ -37,6 +45,7 @@ describe('errorHandler', () => {
         // The crash must be logged (via the structured logger, since this
         // minimal app has no pino-http to attach req.log) but never exposed.
         const errSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
+        Sentry.captureException.mockClear();
         const app = appWith((a) =>
             a.get('/boom', () => {
                 throw new Error('secret internal details');
@@ -49,7 +58,26 @@ describe('errorHandler', () => {
         expect(res.body).toEqual({ error: 'Internal server error' });
         expect(JSON.stringify(res.body)).not.toContain('secret');
         expect(errSpy).toHaveBeenCalled(); // still logged server-side
+        // Unexpected errors must also reach Sentry (no-op without a DSN,
+        // but the call must happen for production capture to work).
+        expect(Sentry.captureException).toHaveBeenCalledWith(
+            expect.objectContaining({ message: 'secret internal details' }),
+            expect.anything()
+        );
         errSpy.mockRestore();
+    });
+
+    it('does not send intentional HttpErrors to Sentry', async () => {
+        Sentry.captureException.mockClear();
+        const app = appWith((a) =>
+            a.get('/boom', () => {
+                throw new HttpError(404, 'not an incident');
+            })
+        );
+
+        await request(app).get('/boom');
+
+        expect(Sentry.captureException).not.toHaveBeenCalled();
     });
 });
 
