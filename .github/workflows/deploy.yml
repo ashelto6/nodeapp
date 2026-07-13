@@ -76,11 +76,16 @@ jobs:
             # Read only the one needed value -- never source .env as
             # shell (issue #60: compose parses .env more leniently than
             # bash; sourcing broke on a value bash couldn't parse).
-            NGINX_PORT=$(grep -m1 '^NGINX_PORT=' .env | cut -d= -f2)
+            # tr strips CR so a Windows-edited .env can't poison the URL
+            # (same failure class as issue #60).
+            NGINX_PORT=$(grep -m1 '^NGINX_PORT=' .env | cut -d= -f2 | tr -d '\r')
             for i in $(seq 1 12); do
-              if curl -sf -o /dev/null "http://localhost:${NGINX_PORT}/api/health"; then
+              # --max-time caps a hung connection so one stuck attempt
+              # can't stall the gate past its 60s budget.
+              if curl -sf --max-time 5 -o /dev/null "http://localhost:${NGINX_PORT}/api/health"; then
                 echo "Health check passed."
-                docker image prune -f
+                # Cleanup must never fail a healthy deploy (set -e).
+                docker image prune -f || true
                 exit 0
               fi
               sleep 5
