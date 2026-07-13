@@ -3,9 +3,12 @@
 A MERN (MongoDB, Express, React, Node) app behind nginx, deployed to Linode
 via GitHub Actions.
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — MERN restructure plan and reasoning
+- [ARCHITECTURE.md](ARCHITECTURE.md) — architecture decisions, code-structure
+  conventions, planned platform targets, and deliberately-deferred gaps
 - [CONTRIBUTING.md](CONTRIBUTING.md) — issue/branch/PR workflow
-- [DEPLOY.md](DEPLOY.md) — one-time Linode server setup and deploy pipeline
+- [DEPLOY.md](DEPLOY.md) — Linode server setup, deploy pipeline, uptime
+  monitoring, and error tracking
+- [LICENSE](LICENSE) — PolyForm Noncommercial 1.0.0 (commercial use reserved)
 
 ## Local development
 
@@ -16,18 +19,21 @@ Requires Docker and Docker Compose.
    cp .env.example .env
    ```
 2. Start the full stack in dev mode (hot-reload client + server, nginx
-   proxying to the Vite dev server):
+   proxying to the Vite dev server), detached so your terminal stays free:
    ```bash
-   docker compose up
+   docker compose up -d
    ```
    `docker-compose.override.yml` is picked up automatically alongside
    `docker-compose.yaml` whenever you run `docker compose` with no `-f`
-   flags — no extra flags needed for the dev shape.
+   flags — no extra flags needed for the dev shape. Want live logs?
+   `docker compose logs -f` (or `-f <service>` for one service).
 3. Open `http://localhost:<NGINX_PORT>` (default `9999`) in a browser.
    This loads the React client, which calls `/api/health` (proxied
-   through nginx to Express, which reports MongoDB connection status) —
-   you should see the API status and Mongo connection state rendered on
-   the page. In dev mode you can also hit the Vite dev server directly
+   through nginx to Express) — you should see the API status and Mongo
+   connection state rendered on the page. The health endpoint's contract
+   is carried by its status code: 200 only when fully healthy, 503 when
+   degraded (e.g. Mongo unreachable) — in which case the page shows its
+   error state. In dev mode you can also hit the Vite dev server directly
    at `http://localhost:<CLIENT_PORT>` (default `5173`), bypassing nginx.
 4. Edits to files under `client/` or `server/` hot-reload automatically
    (Vite HMR for the client, `nodemon` for the server).
@@ -73,7 +79,7 @@ side-effect-only entry points, each documented in the config.
 
 | Command | What it does |
 |---|---|
-| `docker compose up` | Start everything in dev mode (override auto-applied) |
+| `docker compose up -d` | Start everything in dev mode, detached (override auto-applied) |
 | `docker compose build` | Build all images (dev shape, since override auto-applies) |
 | `docker compose down` | Stop and remove containers |
 | `docker compose logs -f <service>` | Tail a specific service's logs (`server`, `nginx`, `client`, `mongo`) |
@@ -95,3 +101,8 @@ database too.
 | server (Express API) | `SERVER_HOST` | `SERVER_PORT` |
 | client (Vite dev server, dev only) | `CLIENT_HOST` | `CLIENT_PORT` |
 | mongo | `MONGO_HOST` | `MONGO_PORT` |
+
+## License
+
+[PolyForm Noncommercial 1.0.0](LICENSE) — noncommercial use and
+modification permitted; commercial use reserved to the copyright holder.
