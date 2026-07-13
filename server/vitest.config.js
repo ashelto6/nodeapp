@@ -2,6 +2,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    // Keep test output readable: request/app logs stay silent in tests.
+    // Spies on logger methods still record calls regardless of level.
+    env: { LOG_LEVEL: 'silent' },
     coverage: {
       // istanbul instruments source at transform time. The default v8
       // provider mis-attributed files loaded through both the CJS

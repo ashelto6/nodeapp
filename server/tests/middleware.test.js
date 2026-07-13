@@ -6,6 +6,7 @@ import { errorHandler, notFoundHandler } from '../src/middleware/error.middlewar
 import { validate } from '../src/middleware/validate.middleware.js';
 import { HttpError } from '../src/utils/http-error.js';
 import { asyncHandler } from '../src/utils/async-handler.js';
+import { logger } from '../src/logger.js';
 
 // Builds a minimal app around one route so each middleware can be
 // exercised through real requests, independent of the app's real routes.
@@ -33,8 +34,9 @@ describe('errorHandler', () => {
     });
 
     it('returns a sanitized 500 for unexpected errors without leaking details', async () => {
-        // Silence the intentional console.error this path produces.
-        const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        // The crash must be logged (via the structured logger, since this
+        // minimal app has no pino-http to attach req.log) but never exposed.
+        const errSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
         const app = appWith((a) =>
             a.get('/boom', () => {
                 throw new Error('secret internal details');
