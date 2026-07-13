@@ -150,6 +150,31 @@ accumulating non-HTTP business logic worth reusing or testing in
 isolation, that's the trigger to introduce a `services/` layer between
 controllers and models — deliberately not created up front.
 
+## Planned platform targets (issue #56)
+
+A **mobile client (React Native) is a declared future requirement**,
+not a hypothetical. No mobile work is scheduled yet, but the constraint
+steers decisions made in the meantime:
+
+- **Auth must be designed token-friendly** (bearer tokens work
+  identically in browsers and native apps). A cookie-only session
+  design would need reworking for mobile — raise this at auth design
+  time, whenever that happens.
+- **TLS/HTTPS is a hard prerequisite for mobile** (iOS App Transport
+  Security and modern Android block plain HTTP by default). Mobile
+  work approaching is a second trigger — alongside "has a domain" —
+  that ends the current HTTPS deferral.
+- **API backward compatibility** becomes a real discipline once a
+  store-distributed app exists (old app versions linger on phones for
+  months and the API must not break them). Consider `/api` versioning
+  conventions when the API grows real feature surface.
+- The current architecture already supports this direction: the server
+  is a pure JSON API with no HTML responsibilities (client-agnostic,
+  and CORS is irrelevant to native apps since it's browser-enforced),
+  and the client's `api/` layer is near-portable to React Native. UI
+  components are not portable (DOM vs native primitives) — screens get
+  rewritten, architecture carries over.
+
 ## Known gaps, deliberately deferred
 
 Things that are genuine gaps but don't have a concrete next action yet —
