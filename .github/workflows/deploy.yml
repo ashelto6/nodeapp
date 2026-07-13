@@ -69,4 +69,20 @@ jobs:
             git reset --hard origin/main
             docker compose -f docker-compose.yaml pull
             docker compose -f docker-compose.yaml up -d --remove-orphans
-            docker image prune -f
+            # Post-deploy health gate (issue #52): `up -d` exits 0 once
+            # containers are created, even if the app inside is broken.
+            # /api/health returns 200 only when fully healthy (503 when
+            # degraded), so the status code alone is the contract here.
+            . ./.env
+            for i in $(seq 1 12); do
+              if curl -sf -o /dev/null "http://localhost:${NGINX_PORT}/api/health"; then
+                echo "Health check passed."
+                docker image prune -f
+                exit 0
+              fi
+              sleep 5
+            done
+            echo "Health check FAILED: app not healthy within 60s of deploy."
+            docker compose -f docker-compose.yaml ps
+            docker compose -f docker-compose.yaml logs --tail 30 server
+            exit 1
