@@ -73,7 +73,10 @@ jobs:
             # containers are created, even if the app inside is broken.
             # /api/health returns 200 only when fully healthy (503 when
             # degraded), so the status code alone is the contract here.
-            . ./.env
+            # Read only the one needed value -- never source .env as
+            # shell (issue #60: compose parses .env more leniently than
+            # bash; sourcing broke on a value bash couldn't parse).
+            NGINX_PORT=$(grep -m1 '^NGINX_PORT=' .env | cut -d= -f2)
             for i in $(seq 1 12); do
               if curl -sf -o /dev/null "http://localhost:${NGINX_PORT}/api/health"; then
                 echo "Health check passed."
