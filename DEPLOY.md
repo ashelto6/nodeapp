@@ -135,6 +135,23 @@ In the GitHub repo: **Settings → Secrets and variables → Actions**, add:
 Push to `main` (or merge a PR into it) and the workflow will build, push to
 GHCR, and redeploy automatically.
 
+## 7. Uptime monitoring (issue #34)
+
+External monitoring runs on **UptimeRobot** (free tier, under the
+project owner's account — not recreatable from this repo alone):
+
+- Monitor type: HTTP(s), checking `http://<linode-ip>/api/health`
+  every 5 minutes **from the public internet** — the same path real
+  users take, which the deploy gate (localhost-side) can't see.
+  A firewall misconfiguration or full outage between deploys is
+  caught here and nowhere else.
+- `/api/health` returns 200 only when fully healthy and **503 when
+  degraded** (e.g. Mongo unreachable — see issue #52), so the monitor
+  alerts on partial failures too, not just a dead server.
+- Alerts go to the owner's email. If rebuilding this setup: create the
+  monitor with the values above; there is nothing to configure
+  server-side.
+
 ## Not covered yet
 
 - **TLS/HTTPS** — skipped for now since there's no domain pointed at this
