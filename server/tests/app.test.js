@@ -17,13 +17,15 @@ describe('GET /api/health', () => {
         expect(res.body).toEqual({ status: 'ok', mongo: 'connected' });
     });
 
-    it('reports disconnected when mongoose readyState is not 1', async () => {
+    it('returns 503 degraded when mongoose readyState is not 1', async () => {
         vi.spyOn(mongoose, 'connection', 'get').mockReturnValue({ readyState: 0 });
 
         const res = await request(createApp()).get('/api/health');
 
-        expect(res.status).toBe(200);
-        expect(res.body).toEqual({ status: 'ok', mongo: 'disconnected' });
+        // The status code is the health contract (issue #52): callers
+        // like the deploy gate and uptime monitors rely on it alone.
+        expect(res.status).toBe(503);
+        expect(res.body).toEqual({ status: 'degraded', mongo: 'disconnected' });
     });
 });
 

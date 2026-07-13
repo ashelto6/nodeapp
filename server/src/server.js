@@ -6,7 +6,7 @@ import { connectDB } from './db.js';
 const app = createApp();
 
 // Connect to MongoDB in the background. The server still starts if Mongo
-// is unavailable; /api/health reports the connection state either way.
+// is unavailable; /api/health returns 503 (degraded) until it connects.
 connectDB()
     .then(() => console.log('Connected to MongoDB'))
     .catch((err) => console.error('MongoDB connection error:', err));
