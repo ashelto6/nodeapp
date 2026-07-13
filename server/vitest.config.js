@@ -20,6 +20,9 @@ export default defineConfig({
         // Thin mongoose.connect wrapper; requires a live MongoDB, so
         // it is exercised by compose-shape verification, not unit tests.
         'src/db.js',
+        // Side-effect-only Sentry init (same category as server.js/db.js);
+        // exercised by running the real stack with a DSN, not unit tests.
+        'src/sentry.js',
       ],
       // Ratcheted gate (issue #17): thresholds sit just under measured
       // coverage at the time of the last update, so CI fails on

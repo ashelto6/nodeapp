@@ -152,6 +152,18 @@ project owner's account — not recreatable from this repo alone):
   monitor with the values above; there is nothing to configure
   server-side.
 
+## 8. Error tracking (issue #35)
+
+Runtime exceptions are captured to **Sentry** (free tier, owner's
+account, Express project, error monitoring only -- no tracing or
+profiling). Server-side setup is one line: `SENTRY_DSN=<dsn>` in the
+server's `.env`. Without that variable Sentry is a no-op by design
+(tests, CI, and local dev stay offline). Only unexpected errors (the
+sanitized-500 path) are captured; intentional HttpErrors (404s,
+validation 400s) never are. If rebuilding: create a Sentry project
+(platform: Express), put its DSN in the production `.env`, restart the
+server container.
+
 ## Not covered yet
 
 - **TLS/HTTPS** — skipped for now since there's no domain pointed at this
