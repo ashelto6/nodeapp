@@ -1,0 +1,92 @@
+name: Dependency Gate
+
+# Enforces GitHub's native issue dependencies at merge time (issue #70).
+# "Blocked by" links are advisory on their own; this turns them into a
+# required status check: a PR that closes an issue with OPEN blockers
+# fails here and cannot merge until the blockers close.
+#
+# `edited` matters: closing references ("Closes #N") live in the PR
+# body, so body edits must re-evaluate the gate.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  dependency-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check closing issues for open blockers
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            // GitHub's own parse of closing keywords -- authoritative,
+            // unlike regexing the body ourselves.
+            const query = `
+              query($owner: String!, $repo: String!, $pr: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pr) {
+                    closingIssuesReferences(first: 50) {
+                      nodes { number state title }
+                    }
+                  }
+                }
+              }`;
+            const result = await github.graphql(query, { owner, repo, pr: prNumber });
+            const linked = result.repository.pullRequest.closingIssuesReferences.nodes;
+
+            if (linked.length === 0) {
+              core.info('No closing issue references on this PR -- gate passes.');
+              return;
+            }
+
+            const violations = [];
+            for (const issue of linked) {
+              // A linked issue that is already closed cannot be blocked
+              // in any meaningful sense -- skip it.
+              if (issue.state === 'CLOSED') {
+                core.info(`#${issue.number} is already closed -- skipping.`);
+                continue;
+              }
+
+              let blockers = [];
+              try {
+                const resp = await github.request(
+                  'GET /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by',
+                  { owner, repo, issue_number: issue.number }
+                );
+                blockers = resp.data;
+              } catch (e) {
+                // Degrade loudly rather than false-red: if the endpoint
+                // is unavailable, say so and treat as no dependencies.
+                core.warning(`Could not read dependencies for #${issue.number}: ${e.message}`);
+                continue;
+              }
+
+              for (const blocker of blockers) {
+                if (blocker.state === 'open') {
+                  violations.push(
+                    `#${issue.number} ("${issue.title}") is blocked by open #${blocker.number} ("${blocker.title}")`
+                  );
+                }
+              }
+            }
+
+            if (violations.length > 0) {
+              core.setFailed(
+                'This PR closes issue(s) whose blockers are still open:\n' +
+                violations.map((v) => `  - ${v}`).join('\n') +
+                '\n\nMerge (or close) the blocker(s) first. NOTE: a blocker ' +
+                'closing does NOT auto-re-run this check -- re-run it from ' +
+                "the PR's Checks tab (or push a commit) after unblocking."
+              );
+            } else {
+              core.info('All closing issue references are unblocked -- gate passes.');
+            }
