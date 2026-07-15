@@ -9,7 +9,9 @@ describe('GET /api/health', () => {
     afterEach(() => vi.restoreAllMocks());
 
     it('reports connected when mongoose readyState is 1', async () => {
-        vi.spyOn(mongoose, 'connection', 'get').mockReturnValue({ readyState: 1 });
+        vi.spyOn(mongoose, 'connection', 'get').mockReturnValue({
+            readyState: 1,
+        });
 
         const res = await request(createApp()).get('/api/health');
 
@@ -18,7 +20,9 @@ describe('GET /api/health', () => {
     });
 
     it('returns 503 degraded when mongoose readyState is not 1', async () => {
-        vi.spyOn(mongoose, 'connection', 'get').mockReturnValue({ readyState: 0 });
+        vi.spyOn(mongoose, 'connection', 'get').mockReturnValue({
+            readyState: 0,
+        });
 
         const res = await request(createApp()).get('/api/health');
 

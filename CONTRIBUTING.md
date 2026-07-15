@@ -20,9 +20,10 @@ Two companion documents govern how work is finished and where it stands:
    ```bash
    git push -u origin 12-fix-nginx-config
    ```
-4. Open a pull request into `main`. Three required status checks gate the
-   merge: `test` (both Vitest suites with their coverage thresholds),
-   `build` (all three Docker images), and `dependency-gate` (see below).
+4. Open a pull request into `main`. Required status checks gate the merge:
+   `test` (both Vitest suites with their coverage thresholds), `build` (all
+   three Docker images), `lint` (ESLint + Prettier for both packages), and
+   `dependency-gate` (see below).
 5. Review the diff on GitHub, then merge. Merging into `main` automatically
    triggers `.github/workflows/deploy.yml`, which builds, pushes to GHCR,
    deploys to the Linode server, and health-checks the result.

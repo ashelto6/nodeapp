@@ -13,7 +13,7 @@ describe('App', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ status: 'ok', mongo: 'connected' }),
-      })
+      }),
     );
 
     render(<App />);

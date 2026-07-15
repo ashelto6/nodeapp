@@ -13,7 +13,10 @@ function notFoundHandler(req, res) {
 // Errors with a `status` (HttpError) are intentional and safe to expose;
 // anything else is an unexpected crash -- log it, return a generic 500,
 // and never leak internal details to the client.
-function errorHandler(err, req, res, next) {
+// `_next` is unused but required: Express detects error middleware by the
+// 4-argument arity. The `_` prefix marks it intentionally unused (see the
+// no-unused-vars argsIgnorePattern in eslint.config.js).
+function errorHandler(err, req, res, _next) {
     if (err.status) {
         return res.status(err.status).json({ error: err.message });
     }

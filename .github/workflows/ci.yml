@@ -28,6 +28,34 @@ jobs:
           npm ci
           npm run test:coverage
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # eslint enforces code quality; prettier --check enforces formatting.
+      # Both scripts fail on any violation (lint uses --max-warnings=0), so a
+      # style or quality regression fails the PR the same way a test would.
+      - name: Server lint + format check
+        working-directory: server
+        run: |
+          npm ci
+          npm run lint
+          npm run format:check
+
+      - name: Client lint + format check
+        working-directory: client
+        run: |
+          npm ci
+          npm run lint
+          npm run format:check
+
   build:
     runs-on: ubuntu-latest
     steps:
