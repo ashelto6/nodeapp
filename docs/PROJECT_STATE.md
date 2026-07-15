@@ -12,24 +12,23 @@ _Last updated: 2026-07-15_
 
 ## Current milestone
 
-**Phase 3: Quick Wins** — cheap, independent hardening (10 closed / 11 open;
-#70 and #74 now merged, #76 in progress). Next milestone queued: **Phase 4:
+**Phase 3: Quick Wins** — cheap, independent hardening (11 closed / 11 open;
+#76 now merged, #78 newly filed). Next milestone queued: **Phase 4:
 Reliability** (0 closed / 2 open — #12 Mongo backups, #18 incident runbook).
 
 Phases 1 (Foundation) and 2 (Observability) are complete and audited.
 
 ## Current branch
 
-`76-deploy-path-filter` (adds a runtime-path allowlist to the deploy trigger).
-`main` is at merge commit `8e446b2` (PR #75, the engineering process docs).
+`76-verify-skip-docs` (this docs-only close-out, which doubles as the
+empirical test that a non-runtime push does NOT deploy). `main` is at merge
+commit `584b464` (PR #77, the #76 deploy path filter).
 
 ## Active pull requests
 
-- **PR #77 — #76 deploy path filter.** Adds a `paths:` allowlist to
-  `deploy.yml` so only runtime changes redeploy. All three required checks
-  green; open, awaiting the owner's manual merge. Post-merge live verification
-  (docs-only push → no run; server change → deploys + health-checks) is the
-  remaining Definition-of-Done item.
+- **This docs-only close-out PR (#76 verification).** Updates this file only;
+  its whole purpose is to prove the #76 skip path — merging it must produce
+  **no** deploy run. Awaiting the owner's manual merge.
 - (No other PRs open.)
 
 ## CI/CD status
@@ -37,9 +36,11 @@ Phases 1 (Foundation) and 2 (Observability) are complete and audited.
 - `main` branch protection required checks: **`build`, `test`,
   `dependency-gate`** (`strict: true`, `enforce_admins: true`). The dependency
   gate is binding as of 2026-07-15.
-- Last deploy: run 29396900680 (sha `8e446b22`, the docs-only #75 merge) —
-  **success**. Note this run is itself the motivating case for #76: a
-  Markdown-only merge triggered a full rebuild + redeploy.
+- Last deploy: run 29398196956 (sha `584b464`, the #77 merge) — **success**,
+  health gate green. That merge touched `deploy.yml` (an allowlisted path), so
+  it correctly deployed — the empirical proof of the #76 "runtime path → still
+  deploys" contract. The complementary "docs-only → no deploy" proof is this
+  very PR (see Active pull requests).
 
 ## Current implementation progress
 
@@ -48,9 +49,11 @@ Phases 1 (Foundation) and 2 (Observability) are complete and audited.
   protection required checks, merged, deployed, live-health-checked.
 - **#74 process docs — DONE & merged (PR #75).** `DEFINITION_OF_DONE.md` +
   `PROJECT_STATE.md` now on `main`; `CONTRIBUTING.md` references them.
-- **#76 deploy path filter — in progress** (this branch, PR #77). `paths:`
-  allowlist added to `deploy.yml`; required checks green; awaiting merge +
-  post-merge live verification.
+- **#76 deploy path filter — DONE & merged (PR #77).** `paths:` allowlist on
+  the deploy trigger so only runtime changes redeploy. Deploy path proven live
+  (run 29398196956). Skip path being proven by this docs-only close-out PR.
+- **#78 filed** — bump GitHub Actions off deprecated Node 20 runners (infra,
+  Phase 3), surfaced by the #77 deploy run's annotations.
 
 ## Known blockers
 
@@ -59,6 +62,7 @@ None.
 ## Technical debt / open hardening (Phase 3 unless noted)
 
 - #69 Harden SSH key posture (separate deploy key, passphrase human key) — security
+- #78 Bump GitHub Actions off deprecated Node 20 runners — infra
 - #68 Enable gzip compression at nginx — infra
 - #67 App connects to MongoDB as root admin; needs least-privilege user — security
 - #64 Add ESLint + Prettier with a CI gate — architecture
