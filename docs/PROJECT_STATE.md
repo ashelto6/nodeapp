@@ -13,22 +13,24 @@ _Last updated: 2026-07-15_
 ## Current milestone
 
 **Phase 3: Quick Wins** — cheap, independent hardening (11 closed / 11 open;
-#76 now merged, #78 newly filed). Next milestone queued: **Phase 4:
-Reliability** (0 closed / 2 open — #12 Mongo backups, #18 incident runbook).
+#76 fully closed with both deploy-contract paths proven live). Next milestone
+queued: **Phase 4: Reliability** (0 closed / 2 open — #12 Mongo backups, #18
+incident runbook).
 
 Phases 1 (Foundation) and 2 (Observability) are complete and audited.
 
 ## Current branch
 
-`76-verify-skip-docs` (this docs-only close-out, which doubles as the
-empirical test that a non-runtime push does NOT deploy). `main` is at merge
-commit `584b464` (PR #77, the #76 deploy path filter).
+`80-refresh-project-state` (this docs-only housekeeping change, correcting the
+stale self-referential state left by the #79 close-out). `main` is at merge
+commit `743bdbd` (PR #79, the #76 skip-path verification).
 
 ## Active pull requests
 
-- **This docs-only close-out PR (#76 verification).** Updates this file only;
-  its whole purpose is to prove the #76 skip path — merging it must produce
-  **no** deploy run. Awaiting the owner's manual merge.
+- **This PROJECT_STATE refresh PR (#80).** Docs-only; corrects state that went
+  stale when the self-referential #79 close-out merged. Being docs-only, its
+  merge must produce **no** deploy run (another skip-path datapoint). Awaiting
+  the owner's manual merge.
 - (No other PRs open.)
 
 ## CI/CD status
@@ -39,8 +41,10 @@ commit `584b464` (PR #77, the #76 deploy path filter).
 - Last deploy: run 29398196956 (sha `584b464`, the #77 merge) — **success**,
   health gate green. That merge touched `deploy.yml` (an allowlisted path), so
   it correctly deployed — the empirical proof of the #76 "runtime path → still
-  deploys" contract. The complementary "docs-only → no deploy" proof is this
-  very PR (see Active pull requests).
+  deploys" contract.
+- **Skip path now proven live too.** The subsequent docs-only merge `743bdbd`
+  (PR #79) produced **no** deploy run — the last deploy remains 584b464. Both
+  halves of the #76 path-filter contract are therefore confirmed empirically.
 
 ## Current implementation progress
 
@@ -49,11 +53,13 @@ commit `584b464` (PR #77, the #76 deploy path filter).
   protection required checks, merged, deployed, live-health-checked.
 - **#74 process docs — DONE & merged (PR #75).** `DEFINITION_OF_DONE.md` +
   `PROJECT_STATE.md` now on `main`; `CONTRIBUTING.md` references them.
-- **#76 deploy path filter — DONE & merged (PR #77).** `paths:` allowlist on
-  the deploy trigger so only runtime changes redeploy. Deploy path proven live
-  (run 29398196956). Skip path being proven by this docs-only close-out PR.
+- **#76 deploy path filter — DONE & merged (PRs #77 + #79).** `paths:`
+  allowlist on the deploy trigger so only runtime changes redeploy. **Both
+  contract paths proven live:** deploy path (run 29398196956, sha 584b464) and
+  skip path (docs-only merge 743bdbd produced no deploy run).
 - **#78 filed** — bump GitHub Actions off deprecated Node 20 runners (infra,
   Phase 3), surfaced by the #77 deploy run's annotations.
+- **#80 filed** — this PROJECT_STATE refresh (documentation, unscheduled).
 
 ## Known blockers
 
@@ -91,13 +97,16 @@ None.
 
 ## Next recommended engineering tasks
 
-1. Merge #76 (deploy path filter, PR #77) — owner action — then the
-   post-merge live verification of the skip/deploy paths.
-2. Resume Phase 3. Cheap independent wins: #47 (license field — trivial),
-   #29 (proxy/shutdown), #68 (gzip). Higher-value security: #14 (helmet),
+1. **#64 (ESLint + Prettier gate) — do first.** It unblocks the "no new lint
+   failures" DoD item for every subsequent Phase 3 change, so it pays off most
+   when done early in the phase.
+2. **#29 (Vite proxy changeOrigin + graceful shutdown + `Sentry.flush()`).**
+   Not just hygiene — a *demonstrated* defect: on every deploy the container
+   gets SIGTERM without flushing Sentry, so errors during a rollout (the most
+   diagnostically valuable kind) are silently lost.
+3. Remaining Phase 3, cheap → higher-value: #47 (license field — trivial),
+   #68 (gzip), #78 (Node 20 runner bump), then security: #14 (helmet),
    #67 (least-privilege Mongo user), #69 (SSH posture).
-3. #64 (ESLint + Prettier gate) unblocks the "no new lint failures" DoD item
-   for everything after it — worth doing early in the phase.
 
 ## Process / workflow
 
