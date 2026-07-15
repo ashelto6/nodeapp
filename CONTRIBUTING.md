@@ -3,6 +3,14 @@
 All changes go through an issue branch and a reviewed pull request — `main`
 is protected and cannot be pushed to directly.
 
+Two companion documents govern how work is finished and where it stands:
+
+- [docs/DEFINITION_OF_DONE.md](docs/DEFINITION_OF_DONE.md) — the checklist
+  consulted before closing any issue.
+- [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) — a living snapshot of the
+  current milestone, active issues/PRs, CI status, technical debt, and next
+  recommended tasks. Update it at the end of every session.
+
 1. Open (or pick) a GitHub Issue describing the change.
 2. Branch off `main`, named `<issue-number>-short-description`:
    ```bash
