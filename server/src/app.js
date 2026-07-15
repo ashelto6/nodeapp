@@ -2,7 +2,10 @@ import express from 'express';
 import pinoHttp from 'pino-http';
 import { logger } from './logger.js';
 import healthRoutes from './routes/health.routes.js';
-import { notFoundHandler, errorHandler } from './middleware/error.middleware.js';
+import {
+    notFoundHandler,
+    errorHandler,
+} from './middleware/error.middleware.js';
 
 // Builds and returns the configured Express app WITHOUT starting it or
 // touching the database. server.js uses this for the real process;
@@ -21,7 +24,7 @@ function createApp() {
             autoLogging: {
                 ignore: (req) => req.url === '/api/health',
             },
-        })
+        }),
     );
 
     // Parse JSON request bodies for all routes.

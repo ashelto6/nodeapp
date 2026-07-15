@@ -64,8 +64,8 @@ cd client && npm test
 docker run --rm -v "$(pwd)/server:/server" -w /server node:20-alpine npm test
 ```
 
-CI runs both suites on every pull request (the `test` check), and both
-`test` and `build` must pass before a PR can merge.
+CI runs both suites on every pull request (the `test` check), and
+`test`, `build`, and `lint` must pass before a PR can merge.
 
 CI runs the suites with a **coverage gate** (`npm run test:coverage`):
 thresholds live in `server/vitest.config.js` and `client/vite.config.js`,
@@ -74,6 +74,26 @@ grows, ratchet the thresholds up — never lower them to make a failing PR
 pass. Every `src/` file counts toward coverage (untested files can't hide
 by never being imported); the few deliberate exclusions are the
 side-effect-only entry points, each documented in the config.
+
+### Linting and formatting
+
+Both packages use **ESLint** (code quality) and **Prettier** (formatting),
+configured independently since they target different runtimes — the server is
+Node/Express, the client is React under Vite. Each directory has the same
+scripts:
+
+```bash
+cd server   # or: cd client
+npm run lint          # ESLint; fails on any error or warning
+npm run format:check  # Prettier; fails if anything is unformatted
+npm run format        # Prettier; rewrites files in place
+```
+
+CI runs `lint` + `format:check` for both packages as the `lint` check on every
+pull request. Formatting is deliberately per-package: server code is 4-space
+indented, client code 2-space, each matching how that package was already
+written — Prettier enforces that rather than reformatting one to match the
+other.
 
 ### Useful commands
 

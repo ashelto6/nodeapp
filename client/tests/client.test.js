@@ -12,7 +12,7 @@ describe('request', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ status: 'ok' }),
-      })
+      }),
     );
 
     await expect(request('/api/health')).resolves.toEqual({ status: 'ok' });
@@ -24,11 +24,14 @@ describe('request', () => {
       vi.fn().mockResolvedValue({
         ok: false,
         status: 400,
-        json: () => Promise.resolve({ error: 'Invalid request: body.username' }),
-      })
+        json: () =>
+          Promise.resolve({ error: 'Invalid request: body.username' }),
+      }),
     );
 
-    await expect(request('/api/thing')).rejects.toThrow('Invalid request: body.username');
+    await expect(request('/api/thing')).rejects.toThrow(
+      'Invalid request: body.username',
+    );
   });
 
   it('falls back to a status-based message when the error JSON has no error field', async () => {
@@ -38,7 +41,7 @@ describe('request', () => {
         ok: false,
         status: 503,
         json: () => Promise.resolve({ unrelated: 'shape' }),
-      })
+      }),
     );
 
     await expect(request('/api/thing')).rejects.toThrow('Request failed: 503');
@@ -51,7 +54,7 @@ describe('request', () => {
         ok: false,
         status: 502,
         json: () => Promise.reject(new Error('not json')),
-      })
+      }),
     );
 
     await expect(request('/api/thing')).rejects.toThrow('Request failed: 502');

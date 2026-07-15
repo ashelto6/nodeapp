@@ -13,5 +13,7 @@ connectDB()
     .catch((err) => logger.error({ err }, 'MongoDB connection error'));
 
 app.listen(process.env.SERVER_PORT, () => {
-    logger.info(`${process.env.SERVER_HOST} is listening on port ${process.env.SERVER_PORT}`);
+    logger.info(
+        `${process.env.SERVER_HOST} is listening on port ${process.env.SERVER_PORT}`,
+    );
 });

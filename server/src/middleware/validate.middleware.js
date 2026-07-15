@@ -19,7 +19,10 @@ function validate(schemas) {
             const result = schemas[part].safeParse(req[part]);
             if (!result.success) {
                 const details = result.error.issues
-                    .map((issue) => `${part}.${issue.path.join('.') || '(root)'}: ${issue.message}`)
+                    .map(
+                        (issue) =>
+                            `${part}.${issue.path.join('.') || '(root)'}: ${issue.message}`,
+                    )
                     .join('; ');
                 return next(new HttpError(400, `Invalid request: ${details}`));
             }

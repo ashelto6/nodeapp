@@ -27,7 +27,7 @@ items (deploy health, live verification) can only be satisfied after merge to
       path — the degraded/error branch too (e.g. the health endpoint's 503
       path, not only its 200).
 - [ ] **CI/CD passes.** All required checks green on the PR: `test`, `build`,
-      and `dependency-gate`.
+      `lint`, and `dependency-gate`.
 - [ ] **Coverage gate respected.** `npm run test:coverage` passes; if coverage
       grew, ratchet the thresholds **up** in `server/vitest.config.js` /
       `client/vite.config.js`. Never lower a threshold to make a red PR green.
@@ -39,8 +39,9 @@ items (deploy health, live verification) can only be satisfied after merge to
         decision was made.
 - [ ] **GitHub issue and PR updated.** Issue reflects the final outcome; PR
       body has What / Why / Validation / Remaining. Related PRs linked.
-- [ ] **No new warnings or lint failures introduced.** (ESLint/Prettier gate
-      is tracked in #64; until it lands, still don't introduce new warnings.)
+- [ ] **No new warnings or lint failures introduced.** The `lint` check runs
+      ESLint (`npm run lint`, `--max-warnings=0`) and Prettier
+      (`npm run format:check`) for both packages; both must be clean.
 - [ ] **Architectural constraints validated**, including the **dependency
       gate**: if this PR closes an issue with "Blocked by" links, every
       blocker is already closed (the `dependency-gate` check enforces this).

@@ -1,0 +1,4 @@
+# Prettier ignores node_modules by default; these are the extras.
+dist/
+coverage/
+package-lock.json
