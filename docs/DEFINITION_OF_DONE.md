@@ -69,6 +69,7 @@ When an issue is completed, also:
    knowledge-map, the phase model, or a working agreement. Most issues won't
    touch it; live status (issues, PRs, milestones, CI, deploys) is owned by
    GitHub, never mirrored there.
-7. At the end of the session, **regenerate `docs/SESSION_HANDOFF.md`** (see
-   CONTRIBUTING → "Start and end of every session"): the transient record of
-   what this session did, what's left, and the recommended next task.
+7. At the end of the session, **regenerate `docs/SESSION_HANDOFF.md`** — the
+   transient record of what this session did, what's left, and the recommended
+   next task. It is local and gitignored, so overwrite it in place; no commit or
+   PR (see CONTRIBUTING → "Start and end of every session").
