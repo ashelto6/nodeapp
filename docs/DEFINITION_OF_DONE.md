@@ -64,5 +64,11 @@ When an issue is completed, also:
    confirm it landed in the right milestone).
 3. Update `ARCHITECTURE.md` if architectural behavior changed.
 4. Update `README.md` if user-facing behavior changed.
-5. Create/update an ADR if a long-term design decision was made.
-6. Update `docs/PROJECT_STATE.md`.
+5. Create/update an ADR (`docs/adr/`) if a long-term design decision was made.
+6. Update `docs/PROJECT_STATE.md` **only if durable orientation changed** — its
+   knowledge-map, the phase model, or a working agreement. Most issues won't
+   touch it; live status (issues, PRs, milestones, CI, deploys) is owned by
+   GitHub, never mirrored there.
+7. At the end of the session, **regenerate `docs/SESSION_HANDOFF.md`** (see
+   CONTRIBUTING → "Start and end of every session"): the transient record of
+   what this session did, what's left, and the recommended next task.

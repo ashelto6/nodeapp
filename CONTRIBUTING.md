@@ -3,13 +3,38 @@
 All changes go through an issue branch and a reviewed pull request — `main`
 is protected and cannot be pushed to directly.
 
-Two companion documents govern how work is finished and where it stands:
+## Where state lives
 
+**GitHub is the single source of truth for all dynamic state** — Issues (work
+items and their status), Pull Requests (change records + checks), Milestones
+(roadmap progress), and Actions (CI + deploy results). Committed docs never
+mirror these; they hold only durable or transient *context*, split by how fast
+it changes:
+
+- [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) — **durable** orientation: the
+  map of where every kind of knowledge lives, the phase model, and new-session
+  bootstrap steps. Edited only when long-lived context changes.
+- [docs/SESSION_HANDOFF.md](docs/SESSION_HANDOFF.md) — **transient** thread:
+  what the last session did, what's left, blockers, validation, and the
+  recommended next task. Regenerated every session, read at the start of the
+  next.
 - [docs/DEFINITION_OF_DONE.md](docs/DEFINITION_OF_DONE.md) — the checklist
   consulted before closing any issue.
-- [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) — a living snapshot of the
-  current milestone, active issues/PRs, CI status, technical debt, and next
-  recommended tasks. Update it at the end of every session.
+- [docs/adr/](docs/adr/) — point-in-time records of long-term decisions.
+
+The rationale for this split is
+[ADR-0001](docs/adr/0001-project-state-workflow.md).
+
+## Start and end of every session
+
+- **At the start:** read `docs/PROJECT_STATE.md` (orientation) and
+  `docs/SESSION_HANDOFF.md` (where the last session left off), then reconcile
+  anything dynamic against GitHub — it wins over any prose.
+- **At the end:** **regenerate `docs/SESSION_HANDOFF.md`** for the work just
+  done (it rides in the session's PR; a session with no code change opens a
+  small docs-only PR, which skips the deploy). Touch `PROJECT_STATE.md`,
+  `ARCHITECTURE.md`, or an ADR **only if durable knowledge actually changed** —
+  routine work should not churn them.
 
 1. Open (or pick) a GitHub Issue describing the change.
 2. Branch off `main`, named `<issue-number>-short-description`:

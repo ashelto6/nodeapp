@@ -1,129 +1,81 @@
 # Project State
 
-> Living snapshot of the project so a fresh session (human or agent) can
-> continue with minimal reliance on conversation history. Keep it current;
-> update it at the end of every session and whenever state materially changes.
+> **Orientation doc for a new session (human or agent).** Read this first to
+> learn *what this project is* and *where each kind of knowledge lives*. It is
+> deliberately **durable** — it holds only long-lived context, never live
+> status — so it does not go stale between sessions.
 >
-> **Authoritative sources of truth are GitHub and the repository**, not this
-> file — when they disagree, GitHub/the repo win and this file is stale and
-> should be corrected.
+> **GitHub is the single source of truth for all dynamic state**: open work,
+> change records, roadmap progress, and CI/deploy results. This file mirrors
+> none of that. When prose here disagrees with GitHub or the code, GitHub and
+> the code win.
+>
+> For *where the last session left off*, read
+> [SESSION_HANDOFF.md](SESSION_HANDOFF.md) — that is the transient companion to
+> this durable file, regenerated every session.
 
-_Last updated: 2026-07-15_
+## What this project is
 
-## Current milestone
+nodeapp is a MERN (MongoDB, Express, React, Node) app behind nginx, deployed to
+a Linode server via GitHub Actions. To **run or develop** it, see the
+[README](../README.md); for **architecture and design rationale**, see
+[ARCHITECTURE.md](../ARCHITECTURE.md). This file is neither of those — it is the
+map that tells a new session where to look for everything else.
 
-**Phase 3: Quick Wins** — cheap, independent hardening (11 closed / 11 open;
-#76 fully closed with both deploy-contract paths proven live). Next milestone
-queued: **Phase 4: Reliability** (0 closed / 2 open — #12 Mongo backups, #18
-incident runbook).
+## Where knowledge lives (the map)
 
-Phases 1 (Foundation) and 2 (Observability) are complete and audited.
+Nothing dynamic is tracked in committed prose. A new session reconstructs the
+current state by consulting the systems below — never by trusting a checked-in
+status file.
 
-## Current branch
+| Question | Authoritative source |
+| --- | --- |
+| What work is planned / in progress / done? | **GitHub Issues** — open = to-do or in progress, closed = done. Each carries Objective / Acceptance Criteria / Implementation Notes / Edge Cases / `Blocked by`. |
+| What did a specific change do, and did it pass review/CI? | **GitHub Pull Requests** and their checks. Each PR body has What / Why / Validation / Remaining. |
+| What's the roadmap, and how far along is each phase? | **GitHub Milestones** — live open/closed counts per phase. |
+| Did CI pass? Did the last deploy go green? | **GitHub Actions** — the `test` / `build` / `lint` / `dependency-gate` checks, and the deploy workflow's run history. |
+| How is the system built, and why these choices? | [ARCHITECTURE.md](../ARCHITECTURE.md), plus the decision records in [adr/](adr/). |
+| How do I run, develop, and test it? | [README.md](../README.md). |
+| How do I take a change from issue → branch → PR → merge? | [CONTRIBUTING.md](../CONTRIBUTING.md). |
+| When is an issue actually *done*? | [DEFINITION_OF_DONE.md](DEFINITION_OF_DONE.md). |
+| Where did the last session leave off, and what's next? | [SESSION_HANDOFF.md](SESSION_HANDOFF.md) — transient, regenerated each session. |
+| What are the user's durable preferences and how should I work? | Claude memory — persists across sessions, lives outside the repo. |
 
-`64-eslint-prettier-gate` (this change — adds the ESLint + Prettier CI gate,
-issue #64). `main` is at merge commit `1744f65` (PR #81, the PROJECT_STATE
-refresh).
+## The phase model
 
-## Active pull requests
+Work is grouped into sequential **milestones** ("phases"), each a themed batch
+of largely independent issues, audited before the next begins. The lineage so
+far runs Foundation → Observability → Quick Wins → Reliability → … This is the
+*shape* of the roadmap; for **which phase is current and its live progress, see
+GitHub Milestones** — those counts are deliberately not copied here, because
+that is exactly the kind of duplication that goes stale.
 
-- **This lint-gate PR (#64).** Adds ESLint (flat config) + Prettier to both
-  packages, a `lint` CI job, and docs. Touches `server/**` + `client/**`
-  (package.json), so merging **will** trigger a deploy — expected, and the prod
-  image is unchanged (devDeps are omitted from the prod build), so it should
-  health-check green. **Owner action on landing:** add `lint` to `main` branch
-  protection so the check actually gates.
-- (No other PRs open.)
+## Durable working agreements
 
-## CI/CD status
+Long-lived conventions that aren't obvious from the code and rarely change. The
+authoritative detail lives in CONTRIBUTING / the Definition of Done; this is the
+orientation summary.
 
-- `main` branch protection required checks: **`build`, `test`,
-  `dependency-gate`** (`strict: true`, `enforce_admins: true`). The dependency
-  gate is binding as of 2026-07-15.
-- Last deploy: run 29398196956 (sha `584b464`, the #77 merge) — **success**,
-  health gate green. That merge touched `deploy.yml` (an allowlisted path), so
-  it correctly deployed — the empirical proof of the #76 "runtime path → still
-  deploys" contract.
-- **Skip path now proven live too.** The subsequent docs-only merge `743bdbd`
-  (PR #79) produced **no** deploy run — the last deploy remains 584b464. Both
-  halves of the #76 path-filter contract are therefore confirmed empirically.
-- **New `lint` CI check incoming (#64, this PR).** Runs ESLint + Prettier for
-  both packages on every PR. Not yet in branch protection — add it after this
-  lands so it becomes binding alongside `test` / `build` / `dependency-gate`.
+- **`main` is protected; merges are performed manually by the owner** — never
+  automated, never by an agent. Prepare PRs fully merge-ready; the owner clicks
+  merge.
+- **Merging to `main` deploys.** `deploy.yml` runs on push to `main`, gated by a
+  `paths:` allowlist so only runtime changes (`server/`, `client/`, `nginx/`,
+  compose) redeploy — docs-only changes skip it. A post-deploy health gate on
+  `/api/health` is the success contract.
+- **Issue dependencies are merge-enforced.** The `dependency-gate` check fails
+  any PR that closes an issue whose GitHub "Blocked by" links are still open.
+- **Verify empirically.** "Done" means the behavior was observed on the real
+  surface (endpoint hit, deploy watched to green, logs/dashboard read) — not
+  that a checkmark went green. See the Definition of Done.
+- **Every issue and PR follows the standard section templates** (see
+  CONTRIBUTING and the PR template).
 
-## Current implementation progress
+## Bootstrapping a new session
 
-- **#70 dependency-gate — DONE & merged (PR #71).** Proven live pass→fail→pass
-  (runs 29383032695 / 29396015571 / 29396121488), added to `main` branch
-  protection required checks, merged, deployed, live-health-checked.
-- **#74 process docs — DONE & merged (PR #75).** `DEFINITION_OF_DONE.md` +
-  `PROJECT_STATE.md` now on `main`; `CONTRIBUTING.md` references them.
-- **#76 deploy path filter — DONE & merged (PRs #77 + #79).** `paths:`
-  allowlist on the deploy trigger so only runtime changes redeploy. **Both
-  contract paths proven live:** deploy path (run 29398196956, sha 584b464) and
-  skip path (docs-only merge 743bdbd produced no deploy run).
-- **#78 filed** — bump GitHub Actions off deprecated Node 20 runners (infra,
-  Phase 3), surfaced by the #77 deploy run's annotations.
-- **#80 PROJECT_STATE refresh — DONE & merged (PR #81).** Corrected the stale
-  self-referential state; #76 skip path recorded as proven.
-- **#64 ESLint + Prettier gate — IN PROGRESS (this PR).** Flat-config ESLint 9
-  + Prettier in both packages, a `lint` CI job, `--max-warnings=0`. Formatting
-  is per-package (server 4-space, client 2-space) to match existing style.
-  Local `lint` + `format:check` green in both; the test suites are verified in
-  CI (vitest 4 requires Node 20+, so it will not run on the Node 18 dev box).
-  Pending: owner merge + adding `lint` to branch protection.
-
-## Known blockers
-
-None.
-
-## Technical debt / open hardening (Phase 3 unless noted)
-
-- #69 Harden SSH key posture (separate deploy key, passphrase human key) — security
-- #78 Bump GitHub Actions off deprecated Node 20 runners — infra
-- #68 Enable gzip compression at nginx — infra
-- #67 App connects to MongoDB as root admin; needs least-privilege user — security
-- #53 Configure Docker log rotation on the server (json-file unbounded) — reliability
-- #47 package.json `license` says MIT, contradicts PolyForm LICENSE — bug
-- #29 Vite proxy changeOrigin + server graceful shutdown — infra
-- #16 Parameterize hardcoded image owner (ashelto6) in compose — infra
-- #14 Add helmet security headers to Express — security
-- #13 Add dependency vulnerability scanning to CI — security
-- Phase 4: #18 incident runbook, #12 Mongo backup strategy
-- Unscheduled / trigger-gated: #22 ufw-docker, #15 per-feature docs/ structure,
-  #7 Mongo→Atlas, #6 static hosting→CDN
-
-## Recent architectural changes
-
-- **Issue dependencies are now merge-enforced (#70/#71).** A `dependency-gate`
-  required check fails any PR that closes an issue whose "Blocked by" blockers
-  are still open. Proven on both paths and wired into branch protection.
-- Phase 2 observability landed and hardened: UptimeRobot monitor (#34),
-  Sentry error tracking (#35), structured pino request/error logging (#36),
-  post-deploy health gate with `/api/health` status code as the contract
-  (#52). Post-phase hardening audit merged (#62).
-- Phase 1 foundation: MERN restructure, server ESM (#49), server layering
-  (#37), client structure (#38), error middleware (#39), input validation
-  (#40), coverage gate (#17), README refresh (#65).
-
-## Next recommended engineering tasks
-
-1. **Merge #64 (lint gate, this PR)** — owner action — then add `lint` to
-   `main` branch protection so the check actually gates.
-2. **#29 (Vite proxy changeOrigin + graceful shutdown + `Sentry.flush()`).**
-   Not just hygiene — a *demonstrated* defect: on every deploy the container
-   gets SIGTERM without flushing Sentry, so errors during a rollout (the most
-   diagnostically valuable kind) are silently lost.
-3. Remaining Phase 3, cheap → higher-value: #47 (license field — trivial),
-   #68 (gzip), #78 (Node 20 runner bump), then security: #14 (helmet),
-   #67 (least-privilege Mongo user), #69 (SSH posture).
-
-## Process / workflow
-
-- Workflow: `CONTRIBUTING.md`. Definition of Done: `docs/DEFINITION_OF_DONE.md`.
-- Every issue carries Objective / Acceptance Criteria / Implementation Notes /
-  Edge Cases / related PR links. Every PR carries What / Why / logs-or-shots /
-  Remaining work / Validation.
-- Merges to `main` are performed manually by the owner (never automated).
-- ADRs live in `docs/adr/` (create as long-term design decisions are made;
-  none written yet).
+1. Read this file — orientation and the knowledge-map above.
+2. Read [SESSION_HANDOFF.md](SESSION_HANDOFF.md) for where the last session left
+   off and the recommended next task.
+3. Reconcile anything dynamic against GitHub (open issues, PR/CI status,
+   milestone progress). GitHub wins over any prose, here or in the handoff.
+4. Recall Claude memory for the user's durable preferences and working style.
