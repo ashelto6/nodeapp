@@ -3,6 +3,35 @@ name: Build, Push, and Deploy
 on:
   push:
     branches: [main]
+    # Deploy only when a runtime path changes (issue #76). Without this,
+    # a docs-only merge triggered a full rebuild + redeploy.
+    #
+    # This is an ALLOWLIST, chosen deliberately over `paths-ignore`: a push
+    # that matches NONE of these paths is skipped, so the default for any
+    # new/unmatched path is "don't deploy" -- matching the "deploy only when
+    # runtime changed" intent. The cost is that this list must be kept in
+    # sync as the tree grows: a new runtime directory that isn't listed here
+    # will NOT ship. When adding runtime paths, add them here too.
+    #
+    # `paths` AND `branches` combine: a push must be to `main` AND touch one
+    # of these. A push touching both docs and a runtime path still deploys
+    # (any single match triggers). deploy.yml is not a required check, so a
+    # skipped run never blocks a merge.
+    paths:
+      - 'server/**'   # backend source, Dockerfile, and package-lock.json
+      - 'client/**'   # frontend source, Dockerfile, lockfile -- reaches
+                      # prod via the nginx image, which builds the client
+      - 'nginx/**'    # reverse-proxy config + Dockerfile
+      # Root `.dockerignore` governs the nginx build context (`context: .`),
+      # so a change to it can alter the shipped nginx image.
+      - '.dockerignore'
+      - 'docker-compose.yaml'          # prod compose the deploy runs (`-f`)
+      # Dev-only override; prod deploy never applies it (`-f docker-compose.yaml`
+      # only). Listed conservatively -- over-deploying on a dev-compose edit is
+      # harmless; drop this line if strict "prod-runtime only" is preferred.
+      - 'docker-compose.override.yml'
+      - '.env.example'                 # env contract shipped with the image
+      - '.github/workflows/deploy.yml' # the deploy pipeline itself
 
 env:
   REGISTRY: ghcr.io

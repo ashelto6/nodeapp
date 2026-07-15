@@ -12,21 +12,24 @@ _Last updated: 2026-07-15_
 
 ## Current milestone
 
-**Phase 3: Quick Wins** — cheap, independent hardening (8 closed / 11 open
-after #70 closed; #74 in progress). Next milestone queued: **Phase 4:
+**Phase 3: Quick Wins** — cheap, independent hardening (10 closed / 11 open;
+#70 and #74 now merged, #76 in progress). Next milestone queued: **Phase 4:
 Reliability** (0 closed / 2 open — #12 Mongo backups, #18 incident runbook).
 
 Phases 1 (Foundation) and 2 (Observability) are complete and audited.
 
 ## Current branch
 
-`74-engineering-process-docs` (adds these two process docs). `main` is at merge
-commit `a6fb174` (PR #71).
+`76-deploy-path-filter` (adds a runtime-path allowlist to the deploy trigger).
+`main` is at merge commit `8e446b2` (PR #75, the engineering process docs).
 
 ## Active pull requests
 
-- **PR for #74 — engineering process docs** (this `DEFINITION_OF_DONE.md` +
-  `PROJECT_STATE.md`). Open, awaiting the owner's manual merge.
+- **PR #77 — #76 deploy path filter.** Adds a `paths:` allowlist to
+  `deploy.yml` so only runtime changes redeploy. All three required checks
+  green; open, awaiting the owner's manual merge. Post-merge live verification
+  (docs-only push → no run; server change → deploys + health-checks) is the
+  remaining Definition-of-Done item.
 - (No other PRs open.)
 
 ## CI/CD status
@@ -34,15 +37,20 @@ commit `a6fb174` (PR #71).
 - `main` branch protection required checks: **`build`, `test`,
   `dependency-gate`** (`strict: true`, `enforce_admins: true`). The dependency
   gate is binding as of 2026-07-15.
-- Last deploy: run 29396407223 (sha `a6fb174d`) — **success**, live
-  post-deploy health check passed (`/api/health` → 200).
+- Last deploy: run 29396900680 (sha `8e446b22`, the docs-only #75 merge) —
+  **success**. Note this run is itself the motivating case for #76: a
+  Markdown-only merge triggered a full rebuild + redeploy.
 
 ## Current implementation progress
 
 - **#70 dependency-gate — DONE & merged (PR #71).** Proven live pass→fail→pass
   (runs 29383032695 / 29396015571 / 29396121488), added to `main` branch
   protection required checks, merged, deployed, live-health-checked.
-- **#74 process docs — in progress** (this branch). See its PR.
+- **#74 process docs — DONE & merged (PR #75).** `DEFINITION_OF_DONE.md` +
+  `PROJECT_STATE.md` now on `main`; `CONTRIBUTING.md` references them.
+- **#76 deploy path filter — in progress** (this branch, PR #77). `paths:`
+  allowlist added to `deploy.yml`; required checks green; awaiting merge +
+  post-merge live verification.
 
 ## Known blockers
 
@@ -79,7 +87,8 @@ None.
 
 ## Next recommended engineering tasks
 
-1. Merge #74 (process docs) — owner action.
+1. Merge #76 (deploy path filter, PR #77) — owner action — then the
+   post-merge live verification of the skip/deploy paths.
 2. Resume Phase 3. Cheap independent wins: #47 (license field — trivial),
    #29 (proxy/shutdown), #68 (gzip). Higher-value security: #14 (helmet),
    #67 (least-privilege Mongo user), #69 (SSH posture).

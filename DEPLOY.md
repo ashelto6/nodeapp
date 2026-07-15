@@ -1,8 +1,10 @@
 # Deploying to Linode
 
 This is a one-time setup you run yourself on the Linode server (over SSH). Once
-it's done, every push to `main` auto-builds and redeploys via
-`.github/workflows/deploy.yml` — no manual steps after that.
+it's done, a push to `main` that changes a runtime path auto-builds and
+redeploys via `.github/workflows/deploy.yml` — no manual steps after that.
+Docs-only or other non-runtime pushes are skipped by the workflow's `paths`
+allowlist (issue #76); see [Wire up GitHub Actions](#6-wire-up-github-actions) below.
 
 ## 1. Harden the server
 
@@ -133,7 +135,15 @@ In the GitHub repo: **Settings → Secrets and variables → Actions**, add:
 | `LINODE_APP_DIR`   | absolute path, e.g. `/home/deploy/nodeapp`         |
 
 Push to `main` (or merge a PR into it) and the workflow will build, push to
-GHCR, and redeploy automatically.
+GHCR, and redeploy automatically — **as long as the push changes a runtime
+path**. The `push` trigger in `deploy.yml` carries a `paths` allowlist
+(`server/`, `client/`, `nginx/`, the Dockerfiles/lockfiles inside them, the
+root `.dockerignore`, the compose files, `.env.example`, and `deploy.yml`
+itself). A push that touches only non-runtime files (docs, `LICENSE`,
+unrelated CI workflows) is skipped, so a Markdown-only merge no longer
+triggers a full redeploy (issue #76). A push that touches both docs and a
+runtime path still deploys. Keep the allowlist in sync when adding new
+runtime directories.
 
 ## 7. Uptime monitoring (issue #34)
 
