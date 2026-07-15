@@ -1,3 +1,7 @@
 **/node_modules
 .env
 **/coverage
+
+# Transient per-session working scratchpad — local only, never committed.
+# See docs/adr/0001-project-state-workflow.md.
+docs/SESSION_HANDOFF.md

@@ -43,8 +43,14 @@ Allocate project knowledge by **who owns it and how fast it changes**:
 - **Claude memory** holds timeless user preferences and working style, outside
   the repo.
 
-`SESSION_HANDOFF.md` is committed (not gitignored) so cloud sessions and fresh
-clones can read it; its update rides in the session's own PR.
+`SESSION_HANDOFF.md` is **local and gitignored**, not committed — it is a
+per-working-copy scratchpad, updated in place at session end with no commit, PR,
+or deploy. A new session on the same working copy reads it directly; fresh-clone
+and cloud sessions simply reconstruct from GitHub + the durable docs + Claude
+memory without it (the handoff is a convenience, not a sole source). This was
+revised from an initial "committed" design in #85: committing it reintroduced a
+small version of the very churn this ADR set out to remove (a docs-only PR per
+no-code session, and a `main` copy that lags the last unmerged session).
 
 ## Consequences
 
@@ -54,7 +60,9 @@ clones can read it; its update rides in the session's own PR.
   labeled "as of last session" and defers to GitHub, so being historical is
   expected rather than wrong.
 - Duplication is minimized: each fact has exactly one authoritative home.
-- Cost: a session with no code PR must still open a small docs-only PR to update
-  the handoff (docs-only changes skip deploy, so this is cheap). A committed
-  handoff on `main` reflects the last *merged* session, not necessarily the last
-  session — acceptable, because it points at GitHub for anything that moved.
+- No churn: because the handoff is local/gitignored, updating it costs nothing
+  (no commit, PR, or deploy) and it can never go stale on `main`.
+- Cost: the handoff is not visible on GitHub and does not survive a fresh clone
+  or reach a cloud session. Accepted deliberately — those sessions reconstruct
+  from GitHub + the durable repo docs + Claude memory, and the handoff is a
+  same-working-copy convenience rather than a reconstruction source of record.
