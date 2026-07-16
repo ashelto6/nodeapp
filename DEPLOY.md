@@ -98,6 +98,50 @@ domain with no port number needed, and matches the firewall rules below
 (only 22/80/443 are allowed in) without needing a one-off exception for a
 non-standard port.
 
+Set `MONGO_APP_USERNAME`/`MONGO_APP_PASSWORD` to values distinct from the
+`MONGO_INITDB_ROOT_*` root credentials above — see issue #67. On a **brand
+new** server (fresh `mongo-data` volume, first-ever `docker compose up`),
+`mongo/init/create-app-user.js` creates this user automatically and there's
+nothing else to do.
+
+### Migrating an existing production Mongo volume (issue #67)
+
+The init script above only runs when Mongo initializes a *fresh* volume —
+it does **not** run against a volume that already has data, which is the
+case for this app's current production server. On that server, the scoped
+app user must be created manually, **before** merging/deploying the PR that
+switches `server/src/db.js` to require `MONGO_APP_USERNAME`/
+`MONGO_APP_PASSWORD` — otherwise the server container will restart on
+deploy and fail to authenticate (root creds still work for Mongo itself,
+but the app will no longer use them).
+
+1. Back up the volume first, in case a typo below needs undoing:
+   ```bash
+   docker compose exec mongo sh -c '
+     mongodump --authenticationDatabase admin \
+       -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" \
+       --archive=/data/db/pre-67-backup.archive
+   '
+   ```
+2. Add `MONGO_APP_USERNAME`/`MONGO_APP_PASSWORD` to the server's `.env` (pick
+   a fresh, random password — do not reuse the root password), then
+   `docker compose up -d mongo` to pick up the new env vars in the container.
+3. Create the user by running the same init script the fresh-volume path
+   uses, against the already-running container, authenticated as root:
+   ```bash
+   docker compose exec mongo sh -c '
+     mongosh admin -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" \
+       /docker-entrypoint-initdb.d/create-app-user.js
+   '
+   ```
+   Reusing `mongo/init/create-app-user.js` (rather than retyping the
+   `createUser` call) keeps the manual migration and the automatic
+   fresh-volume path from drifting apart. The command is entirely
+   env-var driven — the password is never typed on the command line or
+   written to shell history.
+4. Only after the user exists, merge the PR — the next deploy restarts
+   `server` against the new credentials.
+
 ## 4. Allow the server to pull images from GHCR
 
 If the GHCR packages are public (Package settings on GitHub → make public),
