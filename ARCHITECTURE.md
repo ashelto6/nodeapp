@@ -113,7 +113,10 @@ without leaking internals. Async controllers must be wrapped in
 rejected promises to error middleware on its own. Unexpected errors
 (and only those — never intentional HttpErrors) are also captured to
 Sentry with request context (issue #35), active only when SENTRY_DSN
-is set (production).
+is set (production). On SIGTERM/SIGINT (issue #29), `server.js` drains
+in-flight requests, disconnects Mongo, and calls `Sentry.flush()` before
+exiting, so events captured in the same instant as a deploy's container
+shutdown are not lost.
 
 Input validation is declared per-route with Zod (issue #40): any route
 that accepts input attaches `validate({ body/params/query: schema })`
