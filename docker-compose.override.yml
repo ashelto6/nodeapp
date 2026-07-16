@@ -16,6 +16,11 @@ services:
         image: ghcr.io/ashelto6/nodeapp-nginx:dev
         build:
             target: dev
+        # Dev template's / location proxies to the client dev server, so
+        # nginx needs these two on top of the base environment: block (#111).
+        environment:
+            CLIENT_HOST: ${CLIENT_HOST}
+            CLIENT_PORT: ${CLIENT_PORT}
 
     client:
         build:
@@ -23,7 +28,10 @@ services:
             dockerfile: Dockerfile
             target: dev
         container_name: ${CLIENT_HOST}
-        env_file: .env
+        environment:
+            CLIENT_PORT: ${CLIENT_PORT}
+            SERVER_HOST: ${SERVER_HOST}
+            SERVER_PORT: ${SERVER_PORT}
         ports:
             - ${CLIENT_PORT}:${CLIENT_PORT}
         volumes:

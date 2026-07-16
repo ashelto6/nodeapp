@@ -7,7 +7,16 @@ services:
             target: prod
         container_name: ${SERVER_HOST}
         restart: unless-stopped
-        env_file: .env
+        environment:
+            SERVER_HOST: ${SERVER_HOST}
+            SERVER_PORT: ${SERVER_PORT}
+            MONGO_HOST: ${MONGO_HOST}
+            MONGO_PORT: ${MONGO_PORT}
+            MONGO_DB: ${MONGO_DB}
+            MONGO_APP_USERNAME: ${MONGO_APP_USERNAME}
+            MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
+            LOG_LEVEL: ${LOG_LEVEL}
+            SENTRY_DSN: ${SENTRY_DSN}
 
     nginx:
         image: ghcr.io/${IMAGE_OWNER:-ashelto6}/nodeapp-nginx:${IMAGE_TAG:-latest}
@@ -17,7 +26,11 @@ services:
             target: prod
         container_name: ${NGINX_HOST}
         restart: unless-stopped
-        env_file: .env
+        environment:
+            NGINX_HOST: ${NGINX_HOST}
+            NGINX_PORT: ${NGINX_PORT}
+            SERVER_HOST: ${SERVER_HOST}
+            SERVER_PORT: ${SERVER_PORT}
         ports:
             - ${NGINX_PORT}:${NGINX_PORT}
         depends_on:
@@ -27,7 +40,12 @@ services:
         image: mongo:7
         container_name: ${MONGO_HOST}
         restart: unless-stopped
-        env_file: .env
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+            MONGO_DB: ${MONGO_DB}
+            MONGO_APP_USERNAME: ${MONGO_APP_USERNAME}
+            MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
         volumes:
             - mongo-data:/data/db
             - ./mongo/init:/docker-entrypoint-initdb.d:ro
