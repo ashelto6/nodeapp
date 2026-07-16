@@ -37,7 +37,14 @@ export default defineConfig({
       usePolling: true,
     },
     proxy: {
-      '/api': `http://${process.env.SERVER_HOST || 'node-c'}:${process.env.SERVER_PORT || 8888}`,
+      '/api': {
+        target: `http://${process.env.SERVER_HOST || 'node-c'}:${process.env.SERVER_PORT || 8888}`,
+        // Rewrites the Host header to match the target instead of the
+        // original browser request (issue #29) -- the recommended default
+        // for Vite proxies. No server-side logic keys off Host today, so
+        // this is behaviorally a no-op; it's here for correctness.
+        changeOrigin: true,
+      },
     },
   },
 });
