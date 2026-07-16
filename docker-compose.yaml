@@ -1,6 +1,6 @@
 services:
     server:
-        image: ghcr.io/ashelto6/nodeapp-server:latest
+        image: ghcr.io/${IMAGE_OWNER}/nodeapp-server:${IMAGE_TAG:-latest}
         build:
             context: ./server
             dockerfile: Dockerfile
@@ -12,7 +12,7 @@ services:
             - ${SERVER_PORT}:${SERVER_PORT}
 
     nginx:
-        image: ghcr.io/ashelto6/nodeapp-nginx:latest
+        image: ghcr.io/${IMAGE_OWNER}/nodeapp-nginx:${IMAGE_TAG:-latest}
         build:
             context: .
             dockerfile: nginx/Dockerfile
