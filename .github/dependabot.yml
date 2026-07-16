@@ -6,6 +6,14 @@ updates:
       interval: "weekly"
     assignees:
       - "ashelto6"
+    # Major bumps often break peer resolution or have real breaking changes
+    # (see #103-#107) — leave those to a deliberate, tracked upgrade rather
+    # than an auto-opened PR. Security-update PRs are a separate mechanism
+    # and are NOT subject to this ignore rule: a vulnerability whose only
+    # fix is a major bump still gets a PR (verified against GitHub's docs).
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/client"
@@ -13,3 +21,6 @@ updates:
       interval: "weekly"
     assignees:
       - "ashelto6"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
