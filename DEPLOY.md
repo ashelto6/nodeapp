@@ -129,6 +129,11 @@ cp .env.example .env
 `.env` is gitignored — it stays local to the server and is never pushed to
 GitHub.
 
+If this server pulls images from a different GHCR namespace than the
+upstream repo (a fork, a transfer, a rename), set `IMAGE_OWNER` in `.env`
+accordingly — `docker-compose.yaml` interpolates it into both image
+references rather than hardcoding an owner (issue #16).
+
 **Set `NGINX_PORT=80` in production** rather than leaving the `.env.example`
 default of `9999` (that default is a local-dev convenience value only).
 Using the standard HTTP port means the site is reachable at the bare IP/
@@ -226,6 +231,23 @@ unrelated CI workflows) is skipped, so a Markdown-only merge no longer
 triggers a full redeploy (issue #76). A push that touches both docs and a
 runtime path still deploys. Keep the allowlist in sync when adding new
 runtime directories.
+
+**Rolling back (issue #116):** each deploy pulls the exact `server`/`nginx`
+images its own build job pushed, tagged with the deploying commit's SHA
+(`deploy.yml` exports `IMAGE_TAG` before `pull`/`up`) — not the mutable
+`:latest` tag, so a later deploy can't silently replace what an earlier one
+shipped. To restore an older commit's images on the server:
+
+```bash
+cd <LINODE_APP_DIR>
+IMAGE_TAG=<sha> docker compose -f docker-compose.yaml pull
+IMAGE_TAG=<sha> docker compose -f docker-compose.yaml up -d --remove-orphans
+```
+
+Use the full commit SHA that was pushed to `main` (visible in that commit's
+GHCR package version or in the Actions run that built it). Omitting
+`IMAGE_TAG` falls back to `:latest`, which is only correct if the most
+recent build-and-push run is also the one you want running.
 
 ## 7. Uptime monitoring (issue #34)
 

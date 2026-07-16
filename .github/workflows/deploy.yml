@@ -99,6 +99,12 @@ jobs:
             cd ${{ secrets.LINODE_APP_DIR }}
             git fetch origin main
             git reset --hard origin/main
+            # Pin this deploy to the exact images build-and-push just pushed
+            # (issue #116) -- an env var, not a file edit, so the `reset
+            # --hard` above can't clobber it. Runs each image at the SHA its
+            # own pipeline built, closing the race where a mutable `:latest`
+            # could resolve to a different, concurrently-pushed commit.
+            export IMAGE_TAG=${{ github.sha }}
             docker compose -f docker-compose.yaml pull
             docker compose -f docker-compose.yaml up -d --remove-orphans
             # Post-deploy health gate (issue #52): `up -d` exits 0 once
