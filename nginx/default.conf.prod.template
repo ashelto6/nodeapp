@@ -12,5 +12,21 @@ server {
     location / {
         root /usr/share/nginx/html;
         try_files $uri /index.html;
+
+        # Security headers for browser-rendered content (issue #115).
+        # Complements, does not replace, #14's helmet middleware --
+        # helmet only sees /api/ responses, so the HTML/JS/assets nginx
+        # serves directly need their own headers. Scoped to this
+        # location (not the /api/ one) rather than the server block:
+        # nginx drops *all* inherited add_header directives from a
+        # server block the moment a location adds any of its own, so
+        # putting them here keeps that landmine out of /api/ entirely.
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        # Starter CSP: the Vite build has no inline scripts/styles (see
+        # client/index.html), so same-origin-only is safe out of the box.
+        # Tighten further (nonces/hashes) if inline usage is ever added.
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'" always;
     }
 }

@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { logger } from './logger.js';
 import healthRoutes from './routes/health.routes.js';
@@ -12,6 +13,14 @@ import {
 // tests import it directly and drive it in memory via supertest.
 function createApp() {
     const app = express();
+
+    // Security headers on API responses (issue #14; complements #115,
+    // which covers the static/HTML tier served directly by nginx).
+    // Defaults are sane for a pure JSON API and also drop
+    // `X-Powered-By: Express`, which the 2026-07-16 audit found leaking
+    // live. CSP is left at helmet's default (irrelevant to JSON
+    // responses; only matters for the HTML nginx serves, see #115).
+    app.use(helmet());
 
     // Structured per-request logging (issue #36): one JSON line per
     // request with method, path, status, and latency. Health-check
