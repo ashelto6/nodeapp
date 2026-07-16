@@ -3,6 +3,11 @@ services:
         image: ghcr.io/ashelto6/nodeapp-server:dev
         build:
             target: dev
+        # Direct host access to the API, dev-only (issue #110): prod's
+        # docker-compose.yaml no longer publishes this port at all, since
+        # nginx is meant to be the only publicly reachable service.
+        ports:
+            - ${SERVER_PORT}:${SERVER_PORT}
         volumes:
             - ./server:/server
             - /server/node_modules
