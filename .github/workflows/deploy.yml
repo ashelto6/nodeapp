@@ -22,6 +22,9 @@ on:
       - 'client/**'   # frontend source, Dockerfile, lockfile -- reaches
                       # prod via the nginx image, which builds the client
       - 'nginx/**'    # reverse-proxy config + Dockerfile
+      - 'mongo/**'    # init scripts bind-mounted into the mongo container
+                      # on the server -- runtime, not build-time, so a
+                      # merge here must still trigger a deploy
       # Root `.dockerignore` governs the nginx build context (`context: .`),
       # so a change to it can alter the shipped nginx image.
       - '.dockerignore'

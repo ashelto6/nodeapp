@@ -219,9 +219,9 @@ In the GitHub repo: **Settings → Secrets and variables → Actions**, add:
 Push to `main` (or merge a PR into it) and the workflow will build, push to
 GHCR, and redeploy automatically — **as long as the push changes a runtime
 path**. The `push` trigger in `deploy.yml` carries a `paths` allowlist
-(`server/`, `client/`, `nginx/`, the Dockerfiles/lockfiles inside them, the
-root `.dockerignore`, the compose files, `.env.example`, and `deploy.yml`
-itself). A push that touches only non-runtime files (docs, `LICENSE`,
+(`server/`, `client/`, `nginx/`, `mongo/`, the Dockerfiles/lockfiles inside
+them, the root `.dockerignore`, the compose files, `.env.example`, and
+`deploy.yml` itself). A push that touches only non-runtime files (docs, `LICENSE`,
 unrelated CI workflows) is skipped, so a Markdown-only merge no longer
 triggers a full redeploy (issue #76). A push that touches both docs and a
 runtime path still deploys. Keep the allowlist in sync when adding new
