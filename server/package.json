@@ -14,7 +14,7 @@
         "format:check": "prettier --check ."
     },
     "author": "Your Name",
-    "license": "MIT",
+    "license": "PolyForm-Noncommercial-1.0.0",
     "dependencies": {
         "@sentry/node": "^10.65.0",
         "express": "^4.17.1",
