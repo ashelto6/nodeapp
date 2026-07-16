@@ -129,10 +129,15 @@ cp .env.example .env
 `.env` is gitignored — it stays local to the server and is never pushed to
 GitHub.
 
-If this server pulls images from a different GHCR namespace than the
-upstream repo (a fork, a transfer, a rename), set `IMAGE_OWNER` in `.env`
-accordingly — `docker-compose.yaml` interpolates it into both image
-references rather than hardcoding an owner (issue #16).
+`IMAGE_OWNER` in `.env` only matters for **manual** `docker compose`
+commands on this server (e.g. step 5 below) — `docker-compose.yaml`
+interpolates it into both image references rather than hardcoding an
+owner (issue #16), and falls back to `ashelto6` if this line is missing
+entirely. The automated deploy (`deploy.yml`) never reads it: the workflow
+derives the owner itself (`github.repository_owner`, the same account
+that owns whichever repo triggered the run) and exports it as a shell env
+var before `pull`/`up` (issue #122), so a fork/transfer needs no server
+`.env` change at all for deploys to keep working.
 
 **Set `NGINX_PORT=80` in production** rather than leaving the `.env.example`
 default of `9999` (that default is a local-dev convenience value only).

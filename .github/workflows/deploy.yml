@@ -105,6 +105,12 @@ jobs:
             # own pipeline built, closing the race where a mutable `:latest`
             # could resolve to a different, concurrently-pushed commit.
             export IMAGE_TAG=${{ github.sha }}
+            # Derive the GHCR owner the same way build-and-push does (issue
+            # #16/#122) rather than reading it from the server's .env --
+            # a server's .env can predate a variable this workflow starts
+            # relying on (exactly what broke deploy 497731e), but this
+            # value is never stale since it's computed fresh every run.
+            export IMAGE_OWNER=${{ github.repository_owner }}
             docker compose -f docker-compose.yaml pull
             docker compose -f docker-compose.yaml up -d --remove-orphans
             # Post-deploy health gate (issue #52): `up -d` exits 0 once
