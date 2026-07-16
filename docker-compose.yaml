@@ -8,8 +8,6 @@ services:
         container_name: ${SERVER_HOST}
         restart: unless-stopped
         env_file: .env
-        ports:
-            - ${SERVER_PORT}:${SERVER_PORT}
 
     nginx:
         image: ghcr.io/${IMAGE_OWNER:-ashelto6}/nodeapp-nginx:${IMAGE_TAG:-latest}
