@@ -11,7 +11,11 @@ const app = createApp();
 // Connect to MongoDB in the background. The server still starts if Mongo
 // is unavailable; /api/health returns 503 (degraded) until it connects.
 connectDB()
-    .then(() => logger.info('Connected to MongoDB'))
+    .then(() =>
+        logger.info(
+            `Connected to MongoDB as scoped app user (db=${process.env.MONGO_DB}, user=${process.env.MONGO_APP_USERNAME})`,
+        ),
+    )
     .catch((err) => logger.error({ err }, 'MongoDB connection error'));
 
 const server = app.listen(process.env.SERVER_PORT, () => {
