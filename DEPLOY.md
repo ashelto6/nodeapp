@@ -79,6 +79,44 @@ docker compose version
 If that fails, `get.docker.com` should already have installed it as part of
 `docker-ce-cli`; if not, install `docker-compose-plugin` for your distro.
 
+## 2a. Configure Docker log rotation
+
+Docker's default `json-file` log driver has **no size cap** — container logs
+grow unbounded until the disk fills, silently, since nothing looks unhealthy
+until it does (issue #53). Set a daemon-wide default before starting the app
+so every container, present and future, inherits it:
+
+```bash
+sudo tee /etc/docker/daemon.json > /dev/null <<'EOF'
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+EOF
+sudo systemctl restart docker
+```
+
+This caps each container at 3 rotated 10MB files (30MB max per container).
+
+**This setting only applies to containers created after the restart** — on a
+fresh server (first-ever `docker compose up` in step 5 below) that's
+automatic. On a server that already has the app running, existing containers
+must be recreated to pick it up:
+
+```bash
+docker compose -f docker-compose.yaml up -d --force-recreate
+```
+
+Verify it took effect:
+
+```bash
+docker inspect ${SERVER_HOST} --format '{{json .HostConfig.LogConfig}}'
+# expect: {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+```
+
 ## 3. Clone the app and configure it
 
 ```bash
