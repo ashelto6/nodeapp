@@ -19,6 +19,39 @@ outreach for human approval before anything is sent.
 **The first and only customer is our own team.** There are no customer accounts,
 no subscriptions, no billing, no CRM integration, and no self-serve anything.
 
+## Chosen vertical and metro
+
+**Emergency home services — plumbing, HVAC, electrical as one rubric,
+plumbing-first — in the Sacramento metro.** The reasoning, the rejected
+alternatives, and the expansion path are recorded in
+[ADR-0007](../adr/0007-vertical-metro-and-hero-artifact.md). Two consequences of
+that decision shape the requirements below:
+
+- **Screening captures local-presence evidence, not just on-site findings.** For
+  this vertical the most persuasive, most revenue-legible evidence is the review
+  gap versus competitors, Google Business Profile completeness, and local-search
+  position — harder facts than an aesthetic critique. These are pulled into
+  screening as *signals*, while the corresponding Reputation / GBP / Local-Search
+  *modules* remain future work (see [vision.md](vision.md#long-term-direction)).
+- **The Module One hero artifact is an open question, not a settled one** — see
+  below.
+
+## Open question: the Module One hero artifact
+
+The original concept made the AI-generated homepage redesign the centerpiece of
+the pitch. The vertical analysis put that in doubt: for emergency home services,
+the argument that earns a reply is overwhelmingly the local-dominance audit
+(reviews, GBP, local search), and the redesign reads better as *proof of
+capability* than as the lead.
+
+This is **deliberately unresolved and resolved by data, not argument.** The
+validation gate ([below](#the-validation-gate)) sends outreach in both
+framings — local-dominance-led and redesign-led — and the reply rates decide
+which is the hero. Until then, the redesign stays in scope but is not assumed to
+be the centerpiece, and generation work is sequenced so the decision can be made
+before the expensive redesign generator is built. See
+[ADR-0007](../adr/0007-vertical-metro-and-hero-artifact.md).
+
 ## Operating constraint: delivery capacity
 
 **Delivery capacity is 2–3 jobs per month initially** — founder plus AI
@@ -185,9 +218,17 @@ findings, exported in a form usable for hand-written outreach. At that point,
 outreach is written and sent **by hand** — no generation pipeline — and replies
 are counted.
 
+**The validation is a two-arm test, not a single send.** Because it also
+resolves the hero-artifact open question above, the hand-written outreach runs
+in both framings — one arm led by the local-dominance audit (review gap, GBP,
+local search), one arm led by (or featuring) the homepage redesign — and records
+which earned replies. See the analyzer and outreach issues in GitHub for the
+mechanics.
+
 That reply rate is the input to every downstream decision: whether Stage 2 is
-worth building, how much may be spent per prospect, and whether the redesign is
-necessary or whether a report converts identically for a fraction of the cost.
+worth building, how much may be spent per prospect, and — from the two arms —
+which artifact is the hero and whether the expensive redesign generator is worth
+building at all.
 
 **Explicitly out of scope for Stage 1:** any LLM call, any generated artifact,
 any review dashboard, any authentication work, any sending infrastructure. If
@@ -236,9 +277,11 @@ The MVP succeeds if it answers, with evidence rather than opinion:
 1. Does the chosen vertical and metro contain enough underperforming businesses
    to sustain a pipeline?
 2. What fraction of evidence-backed cold outreach receives a reply?
-3. What does a fully-generated prospect cost, and does that cost survive the
+3. **Which framing is the hero** — does local-dominance-led or redesign-led
+   outreach convert better?
+4. What does a fully-generated prospect cost, and does that cost survive the
    observed conversion rate?
-4. Are generated artifacts good enough to send without meaningful hand-editing?
+5. Are generated artifacts good enough to send without meaningful hand-editing?
 
 A clear "no" on any of these is a successful MVP outcome. It is substantially
 cheaper to learn it here than after the platform is built.
