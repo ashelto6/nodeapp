@@ -41,6 +41,19 @@ answer.
 Being a productized service first is not a lesser ambition. It is the ordering
 that lets the platform be built later on evidence rather than hope.
 
+**Delivery lives in a separate project.** Corevia acquires; a distinct project
+does the actual website work (founder plus AI assistance, capped initially at
+2–3 jobs per month). Keeping them separate is deliberate — they have different
+lifecycles, different failure modes, and no reason to share a codebase. The
+interface between them is a documented handoff, not an integration.
+
+One consequence worth stating early: the delivery project should **run Corevia's
+own analyzers against its own output before shipping**. A company whose pitch is
+"your site has accessibility and performance problems" cannot ship sites with
+accessibility and performance problems. The analyzers already exist by then, so
+this costs almost nothing and converts an obvious credibility exposure into a
+proof point.
+
 **The platform thesis, when it arrives**, is the same machine sold as a
 subscription: continuous monitoring rather than one-shot audits, with the
 business itself as the customer rather than the target. The trigger for taking
