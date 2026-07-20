@@ -134,6 +134,11 @@ system earns.
 **Trigger for generalizing:** when a second vertical's rubric can be written
 down in full from real experience, not imagined in advance.
 
+The first vertical and metro are chosen: **emergency home services
+(plumbing-first) in Sacramento**, with expansion to more metros on the same
+rubric rather than more verticals. The reasoning and the expansion path are in
+[ADR-0007](../adr/0007-vertical-metro-and-hero-artifact.md).
+
 ## Long-term direction
 
 Website analysis is the first module, not the product. Plausible later modules —
@@ -150,3 +155,13 @@ building for future modules is justified**, because it costs almost nothing: a
 not. Everything beyond that contract — module registries, plugin loading,
 per-module configuration UI — is deferred until a second module actually exists
 and its real requirements are known.
+
+**One qualification, from the vertical choice.** For emergency home services the
+most persuasive evidence is not on the website at all — it is the review gap
+versus competitors, Google Business Profile completeness, and local-search
+position (see [ADR-0007](../adr/0007-vertical-metro-and-hero-artifact.md)). So
+the MVP pulls a *subset of those signals* forward into screening and outreach
+evidence, even though Reputation, Review, GBP, and Local-Search remain future
+*modules*. The distinction is deliberate: capturing a handful of scrapeable data
+points that share the existing `Finding` taxonomy is cheap; building the modules
+around them is not, and waits for its trigger like everything else here.
