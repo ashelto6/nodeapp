@@ -1,4 +1,19 @@
-# MERN restructure (issue #5)
+# Architecture
+
+This is the durable design record for the system: how it is built and why
+those choices were made. It has two layers, and the distinction matters when
+deciding where a new decision belongs:
+
+1. **The platform** — the MERN + nginx + Docker foundation, its layering
+   rules, and its deployment shape. Sections up to "Known gaps".
+2. **The product** — the Corevia analysis pipeline built on top of it. See
+   "Corevia product architecture" at the end, plus the product documents
+   under [docs/product/](docs/product/).
+
+Point-in-time decisions live in [docs/adr/](docs/adr/); this file holds the
+resulting shape.
+
+## MERN restructure (issue #5)
 
 This documents the plan and reasoning for turning this app into a MERN
 (MongoDB, Express, React, Node) stack, for reference — especially useful
@@ -202,3 +217,120 @@ condition that would turn each into real work.
   becoming risky enough (schema migrations, breaking API changes) that
   local prod-shape testing (see [README.md](README.md#testing-the-production-shape-locally))
   stops being sufficient confidence.
+
+## Corevia product architecture
+
+The product built on the platform above. Strategy lives in
+[docs/product/vision.md](docs/product/vision.md), requirements in
+[prd.md](docs/product/prd.md), entities in
+[domain-model.md](docs/product/domain-model.md), and the AI component design in
+[agent-architecture.md](docs/product/agent-architecture.md).
+
+### Shape: a modular monolith, not microservices
+
+Corevia adds bounded **modules** inside the existing Express app rather than new
+deployable services:
+
+```
+server/src/modules/
+  discovery/     # find businesses, persist prospects
+  analysis/      # collectors + analyzers -> evidence, findings
+  generation/    # interpreters + generators -> artifacts
+  outreach/      # review, approval, sending, suppression
+```
+
+Each module owns its `routes/`, `controllers/`, `services/`, and `models/`, and
+communicates with other modules **through service interfaces only** — never by
+importing another module's models directly. That single rule is what keeps this
+a modular monolith rather than a tangle, and it is what would make extracting a
+module into its own service tractable if that ever becomes necessary.
+
+The existing layering rules extend unchanged: routes contain no logic,
+controllers contain no route definitions, `server.js` gains neither.
+
+**This fires the `services/` layer trigger** that the client/server structure
+section deliberately deferred. Analysis and generation are substantial non-HTTP
+business logic that must be testable without going through Express, which is
+exactly the condition that was named for introducing the layer.
+
+### Processes
+
+Three runtime processes, two of them new:
+
+| Process | Purpose | Notes |
+| --- | --- | --- |
+| **server** | JSON API, serves the review dashboard's data | Existing. Stays request-scoped; runs no pipeline work |
+| **worker** | Executes pipeline jobs | New. Same image as server, different entrypoint |
+| **browser** | Headless Chromium rendering | New. Separate image; see [ADR-0006](docs/adr/0006-browser-as-separate-service.md) |
+
+The worker is a separate *process*, not a separate service or repository — it
+shares the server's code, models, and configuration, and only differs in what it
+runs at startup. Keeping it in the same image means one build, one deploy, and
+no interface drift between API and pipeline code.
+
+### Pipeline flow
+
+```
+discovery ──> jobs collection ──> worker
+                                    │
+                    ┌───────────────┼───────────────┐
+                    ▼               ▼               ▼
+                collectors ──> analyzers ──> qualification gate
+                    │               │               │
+                 Evidence       Finding             ▼  (qualified only)
+                                            interpreters ──> generators
+                                                                  │
+                                                              Artifact
+                                                                  │
+                                                          citation check
+                                                                  │
+                                                       human review + approval
+                                                                  │
+                                                            OutreachAttempt
+```
+
+Collectors that render pages call the browser service; everything else runs
+in-process in the worker. The qualification gate between analysis and generation
+is the cost boundary from
+[ADR-0002](docs/adr/0002-two-stage-screening-generation-funnel.md) and is not
+optional.
+
+### Job queue
+
+A `jobs` collection in the existing MongoDB, claimed with lease-based
+`findOneAndUpdate`. No Redis, no Temporal, no new stateful service. The reasoning
+and the explicit trigger for replacing it are in
+[ADR-0005](docs/adr/0005-mongo-backed-job-queue.md).
+
+### What does not change
+
+Worth stating explicitly, because the answer is "almost everything":
+
+- nginx's role, the dev/prod template split, and the static-vs-`/api` division
+- The error-handling contract: `HttpError` for intentional failures, generic
+  500s otherwise, Sentry for unexpected errors only
+- Zod validation as the route input contract — extended to also cover AI
+  component input/output boundaries
+- Structured pino logging, graceful shutdown, least-privilege Mongo auth
+- The CI gates, the coverage ratchet, the dependency gate, and the SHA-pinned
+  deploy with its post-deploy health check
+
+The pipeline's long-running work is deliberately kept out of the request cycle
+so the `/api/health` contract the deploy gate depends on stays meaningful.
+
+### New operational obligations
+
+Consequences of the product that the platform did not previously carry:
+
+- **Backups become required** (issue #12, previously trigger-gated). Losing
+  outreach history is worse than ordinary data loss — it means re-contacting
+  people who opted out.
+- **TLS becomes required** before the dashboard is reachable beyond localhost,
+  since it will hold business contact data. This also satisfies the
+  already-declared mobile prerequisite.
+- **Dashboard access control**: network-layer for a single operator (localhost
+  binding plus SSH tunnel, or nginx basic-auth plus IP allowlist); real
+  token-based auth when a second human needs access.
+- **Instance headroom**: Chromium alongside MongoDB and the app on one Linode
+  box is the most likely trigger for a resize. Check before building, not under
+  load.
