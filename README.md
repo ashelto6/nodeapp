@@ -12,7 +12,8 @@ via GitHub Actions.
 
 ## Local development
 
-Requires Docker and Docker Compose.
+Requires Docker with the Compose **v2** plugin (`docker compose version` must
+work — the legacy v1 `docker-compose` binary is not enough).
 
 1. Copy the example env file and adjust values if needed:
    ```bash
