@@ -61,6 +61,34 @@ once a baseline reply rate exists.
 but retained as the fallback — the gate's threshold is tunable and can be set to
 "operator selects" while the scoring model is unproven.
 
+## Amendment (2026-07-20): what the gate actually buys at real volume
+
+The decision stands; the reasoning above overstates its own case and is
+corrected here rather than left to mislead a future reader.
+
+The 1,000-prospect example was written before delivery capacity was established
+at **2–3 jobs per month**. At that capacity the real figures are roughly
+$300/month of compute for about $100 customer acquisition cost against a $2–5k
+job — economically comfortable *with or without* the gate. The cost pressure the
+argument leans on is not actually binding at this scale.
+
+**At this volume the gate's real value is focusing scarce human review time**,
+not saving money. That is still a good reason to keep it: attention is the
+genuinely limited resource, and a gate that halves the number of artifacts
+needing review is worth more than one that halves the compute bill.
+
+Two consequences follow:
+
+- Do not tune the threshold as though compute cost were the binding constraint.
+  It is not. Tune it against review capacity and artifact quality.
+- Limited delivery capacity is a reason to **qualify harder**, not to contact
+  more people (see `../product/prd.md`, "Operating constraint: delivery
+  capacity").
+
+The cost argument becomes binding again if volume rises by an order of
+magnitude — which is exactly the condition under which this ADR should be
+re-read rather than assumed.
+
 ## Consequences
 
 - Screening output is independently valuable: it answers whether the chosen

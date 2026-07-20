@@ -19,6 +19,53 @@ outreach for human approval before anything is sent.
 **The first and only customer is our own team.** There are no customer accounts,
 no subscriptions, no billing, no CRM integration, and no self-serve anything.
 
+## Operating constraint: delivery capacity
+
+**Delivery capacity is 2–3 jobs per month initially** — founder plus AI
+assistance, with the actual website work happening in a separate project.
+Corevia is the acquisition machine; that project is the factory.
+
+This is a *product* constraint, not a footnote about staffing, because it bounds
+what the system is allowed to do.
+
+### It caps outreach volume
+
+A pipeline that produces more interested prospects than can be served does
+active harm. Earning genuine interest with a personalized redesign and then
+saying "I am booked for three months" is worse than never making contact: the
+lead is burned permanently, and **in one vertical in one metro, word travels
+between business owners in the same trade**. The premise that businesses
+experience value before becoming customers breaks if the value cannot be
+delivered. Hence the throttling requirement — outreach volume is derived from
+capacity, reply rate, and close rate rather than set independently.
+
+### It determines required prospect volume, and therefore sending infrastructure
+
+Working backward from ~3 customers per month at an assumed 20% close rate
+(~15 conversations):
+
+| Reply rate | Prospects/month | Sends/day (22 working days) |
+| --- | --- | --- |
+| 2% | ~750 | ~34 |
+| 5% | ~300 | ~14 |
+| 10% | ~150 | ~7 |
+
+Cold outreach runs roughly 20–50 sends per day per warmed mailbox. **A low reply
+rate therefore implies more than one sending mailbox and more than one warmup** —
+so the validation gate's measured rate has a second consequence beyond
+go/no-go, and it lands on infrastructure.
+
+### It is a reason to qualify harder, not to contact more
+
+Scarce capacity means the system can afford to be **highly** selective. Tighten
+the qualification gate rather than widening the funnel: fewer, better prospects
+raise artifact quality per prospect and lower cost per customer.
+
+### It is configurable, not fixed
+
+Capacity here is a constraint on *time*, not capability. It is expected to
+change, so nothing should hardcode it.
+
 ## The two-stage funnel
 
 The single most important structural requirement. The pipeline is **not** a
