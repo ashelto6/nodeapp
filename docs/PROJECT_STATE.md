@@ -16,20 +16,9 @@
 
 ## What this project is
 
-The repository holds two layers, and knowing which one a question is about is
-usually the fastest way to find its answer:
-
-- **The platform** — a MERN (MongoDB, Express, React, Node) app behind nginx,
-  deployed to a Linode server via GitHub Actions. Production-oriented and
-  feature-free by design; this is what the first several phases built.
-- **The product** — **Corevia**, an internal operations tool that discovers
-  businesses in one vertical and metro, screens them for online
-  underperformance, and produces evidence-backed audit artifacts and outreach
-  for human approval. Adopted 2026-07-20. Its strategy, requirements, entities,
-  and AI design live in [product/](product/).
-
-To **run or develop** it, see the [README](../README.md); for **architecture and
-design rationale** across both layers, see
+nodeapp is a MERN (MongoDB, Express, React, Node) app behind nginx, deployed to
+a Linode server via GitHub Actions. To **run or develop** it, see the
+[README](../README.md); for **architecture and design rationale**, see
 [ARCHITECTURE.md](../ARCHITECTURE.md). This file is neither of those — it is the
 map that tells a new session where to look for everything else.
 
@@ -46,10 +35,6 @@ status file.
 | What's the roadmap, and how far along is each phase? | **GitHub Milestones** — live open/closed counts per phase. |
 | Did CI pass? Did the last deploy go green? | **GitHub Actions** — the `test` / `build` / `lint` / `dependency-gate` checks, and the deploy workflow's run history. |
 | How is the system built, and why these choices? | [ARCHITECTURE.md](../ARCHITECTURE.md), plus the decision records in [adr/](adr/). |
-| What is the product, and why this product? | [product/vision.md](product/vision.md) — strategy, thesis, named risks. |
-| What must the MVP do, and what is deliberately excluded? | [product/prd.md](product/prd.md) — requirements, non-goals with revisit triggers. |
-| What are the entities and their invariants? | [product/domain-model.md](product/domain-model.md). |
-| How are the AI components decomposed, and what is *not* AI? | [product/agent-architecture.md](product/agent-architecture.md). |
 | How do I run, develop, and test it? | [README.md](../README.md). |
 | How do I take a change from issue → branch → PR → merge? | [CONTRIBUTING.md](../CONTRIBUTING.md). |
 | When is an issue actually *done*? | [DEFINITION_OF_DONE.md](DEFINITION_OF_DONE.md). |
@@ -64,13 +49,6 @@ far runs Foundation → Observability → Quick Wins → Reliability → … Thi
 *shape* of the roadmap; for **which phase is current and its live progress, see
 GitHub Milestones** — those counts are deliberately not copied here, because
 that is exactly the kind of duplication that goes stale.
-
-Platform phases are followed by **product phases** delivering Corevia. Those
-phases are separated by *evidence gates* rather than by completion alone: the
-screening phase ends with a measured cold-outreach reply rate, and that number
-decides whether and how the generation phase proceeds (see
-[product/prd.md](product/prd.md#the-validation-gate)). A phase whose gate has
-not been satisfied is not done, regardless of how many issues it has closed.
 
 ## Durable working agreements
 
